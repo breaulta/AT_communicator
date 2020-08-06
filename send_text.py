@@ -33,41 +33,34 @@ def check_sms_mode():
     else:
         return "text_mode_error"
 
-#Set SMS for text mode.
+#Set SMS for text mode. sms_mode of 1 = texting (this is what we want), 0 = Programmable data unit PDU.
 def set_sms_mode(sms_mode):
+    sms_mode = str(sms_mode) #convert num to string
     sms_mode_response = send_AT('AT+CMGF=' + sms_mode)
     ok = re.findall("OK", sms_mode_response)
-    if (ok):
-        print "it's ok\n"
-    else:
-        print "it's not ok\n"
+    if (not ok):
+        raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
 
-#def send_text(number, message):
+def send_text(number, message):
+    #Make sure texting is turned on in the SIM card.
+    current_sms_mode = check_sms_mode()
+    if current_sms_mode == "text_mode_off":
+        set_sms_mode("1")
+    elif current_sms_mode == "text_mode_error":
+        raise Exception("SMS mode query error. There may be a problem with modem communication.")
+    #Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
+    response1 = send_AT('AT+CMGS="' + number + '"\r\n') 
+    response2 = send_AT( message + chr(26))
+    #time.sleep(3)
+    #response3 = send_AT('\r\n')
+    #print ('AT+CMGS="' + number + '"\r\n' + message + chr(26))
+    print "CMGS response1: ", response1, "\n"
+    print "CMGS response2: ", response2, "\n"
+    #print "CMGS response3: ", response3, "\n"
 
-current_sms_mode = check_sms_mode()
-if current_sms_mode == "text_mode_off":
-    set_sms_mode("1")
-elif current_sms_mode == "text_mode_error":
-    #throw error
-    raise Exception("SMS mode query error. There may be a problem with modem communication.")
-response_sendtext = send_AT('AT+CMGS="' + '5039895540"' + "\r\n" + "test python send_text" + chr(26))
-print ("response to sending text:" + response_sendtext)
-
-exit(0)
+send_text("5033803136", "hi len this is send_text()")
 
 
-if x:
-  print("YES! We have a match x.group()!", x.group(1))
-
-print "hey\n"
-exit(0)
-print "hello\n"
-
-ser.write('AT+CMGS="5039895540"' + "\r\n" + "this is the message" + chr(26))
-time.sleep(1)
-out = ''
-while ser.inWaiting() > 0:
-    out += ser.read(1)
-if out != '':
-    print ">>>" + out
+#response_sendtext = send_AT('AT+CMGS="' + '5039895540"' + "\r\n" + "test python send_text" + chr(26))
+#print ("response to sending text:" + response_sendtext)
 
