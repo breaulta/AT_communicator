@@ -51,12 +51,11 @@ def send_text(number, message):
     #Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
     response1 = send_AT('AT+CMGS="' + number + '"\r\n') 
     response2 = send_AT( message + chr(26))
-    #time.sleep(3)
-    #response3 = send_AT('\r\n')
-    #print ('AT+CMGS="' + number + '"\r\n' + message + chr(26))
+    time.sleep(3)
+    response3 = send_AT('\r\n')
     print "CMGS response1: ", response1, "\n"
     print "CMGS response2: ", response2, "\n"
-    #print "CMGS response3: ", response3, "\n"
+    print "CMGS response3: ", response3, "\n"
 
 send_text("5033803136", "hi len this is send_text()")
 

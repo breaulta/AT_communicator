@@ -1,0 +1,8 @@
+#!/usr/bin/python
+
+
+#class Hello:
+
+def hello_world():
+    print ("hello beautiful world!\n")
+    return "baby"
