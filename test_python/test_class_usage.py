@@ -8,12 +8,13 @@ from module import SMS
 tx = Transmitter(port = '/dev/ttyUSB2')
 #tx.send_text('5033803136', '2nd from python')
 
-tx.delete_text('1')
-tx.send_AT('AT+CMGL="ALL"')
+delete_result = tx.delete_text('1')
+print "delete result: ", delete_result, "\n"
 
 """
 response = tx.get_all_texts()
 for sms in response:
-	print "phone: ", sms.phone, "\n"
+	print "phone: ", sms.index, "\n"
 #print "sms_obj: ", sms_obj.index, "\n"
+
 """

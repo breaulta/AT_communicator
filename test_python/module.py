@@ -90,8 +90,23 @@ class Transmitter:
 		return sms_array
 				
 	def delete_text(self, index):
-		command = 'AT+CMGD=' + index
-		self.send_AT(command)
+		if self._does_message_at_index_exist(index):
+			command = 'AT+CMGD=' + index
+			self.send_AT(command)
+			if self._does_message_at_index_exist(index):
+				return "text at index '" + index + "' not deleted"
+			else:
+				return "text at index '" + index + "' deleted"
+		else:
+			return "text at index '" + index + "' not found"
+		
+
+	def _does_message_at_index_exist(self, index):
+		sms_list = self.get_all_texts()
+		for sms in sms_list:
+			if sms.index == index:
+				return 1
+		return 0
 
 
 class SMS:
