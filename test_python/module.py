@@ -2,6 +2,7 @@
 import time
 import serial
 import re
+import json
 
 class Transmitter:
 	#Initalize Transmitter object attributes.
@@ -108,6 +109,32 @@ class Transmitter:
 				return 1
 		return 0
 
+	def save_sms_obj_to_json_file(self, text_array, filename):
+		data = {}
+		data['sms'] = []
+		for sms in text_array:
+			data['sms'].append({
+				'index': sms.index,
+				'status': sms.status,
+				'phone': sms.phone,
+				'date': sms.date,
+				'message': sms.message
+			})
+
+		outfile = open(filename, 'w')
+		json.dump(data, outfile)
+		outfile.close()
+
+	def json_file_to_sms_array(self, filename):
+		json_file = open(filename, 'r')
+		read_data = json.load(json_file)
+		json_file.close()
+		sms_array = []
+		for sms_json in read_data['sms']:
+			sms_obj = SMS(sms_json['index'], sms_json['status'], sms_json['phone'], sms_json['date'], sms_json['message'])
+			sms_array.append(sms_obj)
+		return sms_array
+
 
 class SMS:
 	def __init__(self, index, status, phone, date, message):
@@ -117,5 +144,7 @@ class SMS:
 		self.phone = phone
 		self.date = date
 		self.message = message
+
+
 
 
