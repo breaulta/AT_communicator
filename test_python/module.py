@@ -109,20 +109,21 @@ class Transmitter:
 
 	#Saves array of SMS objects to json file.
 	def save_sms_obj_to_json_file(self, text_array, filename):
-		data = {}
-		data['sms'] = []
-		for sms in text_array:
-			data['sms'].append({
-				'index': sms.index,
-				'status': sms.status,
-				'phone': sms.phone,
-				'date': sms.date,
-				'message': sms.message
-			})
+		if self.__is_sms_array(text_array):
+			data = {}
+			data['sms'] = []
+			for sms in text_array:
+				data['sms'].append({
+					'index': sms.index,
+					'status': sms.status,
+					'phone': sms.phone,
+					'date': sms.date,
+					'message': sms.message
+				})
 
-		outfile = open(filename, 'w')
-		json.dump(data, outfile)
-		outfile.close()
+			outfile = open(filename, 'w')
+			json.dump(data, outfile)
+			outfile.close()
 	
 	#Returns array of SMS message objects taken from json file.
 	def json_file_to_sms_array(self, filename):
@@ -135,15 +136,43 @@ class Transmitter:
 			sms_array.append(sms_obj)
 		return sms_array
 
+	def append_texts_to_db_file(self, sms_array, sms_database_file):
+		if self.__is_sms_array(sms_array):
+			#Write new sms messages to database.
+			#First check if sms database file exists.
+			try:
+				open(sms_database_file)
+			#If doesn't exist create it and write new sms messages to it.
+			except IOError:
+				self.save_sms_obj_to_json_file(sms_array, sms_database_file)
+			#Otherwise, read text from database and append sms_array and save to file.
+			else:
+				db_sms_array = self.json_file_to_sms_array(sms_database_file)
+				full_db_sms_array = db_sms_array + sms_array 
+				self.save_sms_obj_to_json_file(full_db_sms_array, sms_database_file)
+
+	def delete_texts_from_sim_card(self, sms_array):
+		if self.__is_sms_array(sms_array):
+			for sms in sms_array:
+				self.delete_text(sms.index)
+
+	#Do we have an array containing SMS objects
+	def __is_sms_array(self, sms_array):
+		if len(sms_array) > 0:
+			for sms in sms_array:
+				if not isinstance(sms, SMS):
+					raise Exception("The objects in the inputted array are not SMS objects!")
+			#Array has elements, and those elements are SMS objects.
+			return 1
 
 class SMS:
-	def __init__(self, index, status, phone, date, message):
-	#def __init__(self, index):
-		self.index = index
-		self.status	= status 
-		self.phone = phone
-		self.date = date
-		self.message = message
+		def __init__(self, index, status, phone, date, message):
+		#def __init__(self, index):
+			self.index = index
+			self.status	= status 
+			self.phone = phone
+			self.date = date
+			self.message = message
 
 
 
