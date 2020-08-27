@@ -35,56 +35,67 @@ class Transmitter:
 			raise Exception("Must run as root!")
 		#Check if our SIM card is connected to the network or not.
 		sim_mode = self.__get_qmicli_mode(sim_path)
-		#If not online, reset, then wait until it boots to low-power mode
-		#We're making a big assumption here that qmicli 'reset' always boots to low-power mode.
+		#If not online, try to turn it on.
 		if sim_mode != "online":
 			self.__set_qmicli_mode('online', sim_path)
-			
-
-
 			timeout_count = 0
+			#Verify that it comes online.
 			while(1):
 				sim_mode = self.__get_qmicli_mode(sim_path)
-				if sim_mode == 'low-power':
-					self.__set_qmicli_mode('online', sim_path)
-					time.sleep(20)
-					while(1):
-						sim_mode = self.__get_qmicli_mode(sim_path)
-						if sim_mode == 'online':
-							print "we're online" + sim_mode
-							return 1
+				if sim_mode == 'online':
+					#We're online! Escape bonds of while loop and return.
+					return 1
+				#Otherwise, let's try to turn it online.
+				else:
+					print "Exceptional case"
+					time.sleep(10)
+					self.__set_qmicli_mode('reset', sim_path)
+					time.sleep(10)
+					while not ( self.__get_qmicli_mode(sim_path) ):
 						time.sleep(1)
-						timeout_count += 1
-						#Wait 2 minutes and then error out.
-						if timeout_count > 120:
-							raise Exception("The SIM card was not reset to online mode!")
-				time.sleep(1)
-				timeout_count += 1
-				#Wait 2 minutes and then error out.
-				if timeout_count > 120:
-					raise Exception("The SIM card cannot be reset to online mode!")
+					#For potential debugging. We expect SIM mode = 'low-power' here after reset.
+					if 'low-power' != self.__get_qmicli_mode(sim_path):
+						print "Warning, SIM Mode is: " + self.__get_qmicli_mode(sim_path)
+					self.__set_qmicli_mode('online', sim_path)
+					time.sleep(10)
+					timeout_count += 1
+					#Time out after a few minutes of trying
+					if timeout_count > 2:
+						raise Exception("The SIM card could not be set to online mode!")
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
 	def __check_sim_path(self, sim_path):
-		#Ensure that path to SIM card exists.
-		try:
-			open(sim_path)
-		except IOError:
-			raise Exception("The SIM card path " + sim_path + " does not exist!")
+		timeout_count = 0
+		while timeout_count < 30:
+			#Ensure that path to SIM card exists.
+			try:
+				open(sim_path)
+			except IOError:
+				time.sleep(1)
+				timeout_count += 1
+			else:
+				return 1
+		raise Exception("The SIM card path " + sim_path + " does not exist!")
 
 	#Sets our SIM card to the specified mode (e.g. 'reset', 'online', etc).
 	def __set_qmicli_mode(self, mode, sim_path):
+		#A second to sleep to avoid error like /dev/ttyUSB2 disappearing.
+		time.sleep(1)
 		self.__check_sim_path(sim_path)
 		os.system("qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 	
 	#Returns SIM card mode (e.g. 'offline', 'online', 'low-power', 'reset', etc.
 	def __get_qmicli_mode(self, sim_path):
+		#A second to sleep to avoid error like /dev/ttyUSB2 disappearing.
+		time.sleep(1)
 		self.__check_sim_path(sim_path)
 		get_output = os.popen('qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		output_read = get_output.read()
-		print "get output is: \n" + output_read
 		mode_match = re.search("Mode: '([a-z-]+)'", output_read)
-		return mode_match.group(1)
+		if mode_match.group(1) is not None:
+			return mode_match.group(1)
+		else:
+			return 0
 
     #Send AT command to modem.
 	def send_AT(self, AT):
