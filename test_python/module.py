@@ -35,18 +35,18 @@ class Transmitter:
 		if not os.geteuid()==0:
 			raise Exception("Must run as root!")
 		#Check if our SIM card is connected to the network or not.
-		self.__check_usb_path(self.usb_path, 1)
+		self.__check_usb_path(self.usb_path, '1')
 		sim_mode = self.__get_qmicli_mode(sim_path)
 		#If not online, try to turn it on.
 		if sim_mode != "online":
-			self.__check_usb_path(self.usb_path, 2)
+			self.__check_usb_path(self.usb_path, '2')
 			self.__set_qmicli_mode('online', sim_path)
-			self.__check_usb_path(self.usb_path, 3)
+			self.__check_usb_path(self.usb_path, '3')
 			timeout_count = 0
 			#Verify that it comes online.
 			while(1):
 				sim_mode = self.__get_qmicli_mode(sim_path)
-				self.__check_usb_path(self.usb_path, 4)
+				self.__check_usb_path(self.usb_path, '4')
 				if sim_mode == 'online':
 					#We're online! Escape bonds of while loop and return.
 					return 1
@@ -54,23 +54,23 @@ class Transmitter:
 				else:
 					print "Exceptional case"
 					self.__set_qmicli_mode('reset', sim_path)
-					self.__check_usb_path(self.usb_path, 5)
+					self.__check_usb_path(self.usb_path, '5')		#THIS FAILED 
 					#Wait until we get a coherent response from get qmiclidd
 					while not ( self.__get_qmicli_mode(sim_path) ):
-						self.__check_usb_path(self.usb_path, 6)
+						self.__check_usb_path(self.usb_path, '6')
 						if timeout_count > 5:
 							raise Exception("Could not get the qmicli mode!")
 						print "in the while not: waiting for qmicli reset"
 						time.sleep(20)
 						timeout_count += 1
 					#For potential debugging. We expect SIM mode = 'low-power' here after reset.
-					self.__check_usb_path(self.usb_path, 7)
+					self.__check_usb_path(self.usb_path, '7')
 					get_response = self.__get_qmicli_mode(sim_path)
-					self.__check_usb_path(self.usb_path, 8)
+					self.__check_usb_path(self.usb_path, '8')
 					if 'low-power' != get_response:
 						print "Warning, SIM Mode is: " + get_response
 					self.__set_qmicli_mode('online', sim_path)
-					self.__check_usb_path(self.usb_path, 9)
+					self.__check_usb_path(self.usb_path, '9')
 					timeout_count += 1
 					#Time out after a few minutes of trying
 					if timeout_count > 5:
@@ -118,7 +118,7 @@ class Transmitter:
 				timeout_count += 1
 			else:
 				return 1
-		raise Exception("The USB path " + usb_path + " does not exist. line number:" + line_number)
+		print "The USB path " + usb_path + " does not exist. line number:" + line_number
 
 
 
