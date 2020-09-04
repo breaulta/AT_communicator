@@ -22,6 +22,7 @@ class Transmitter:
 			stopbits=serial.STOPBITS_TWO,
 			bytesize=serial.EIGHTBITS
 		)
+		self.usb_path = defined_port
 
 	#TO DO: CHECK THAT SIM_PATH EXISTS BEFORE qmicli commands
 
@@ -48,25 +49,31 @@ class Transmitter:
 				#Otherwise, let's try to turn it online.
 				else:
 					print "Exceptional case"
-					time.sleep(10)
 					self.__set_qmicli_mode('reset', sim_path)
-					time.sleep(10)
+					#Wait until we get a coherent response from get qmiclidd
 					while not ( self.__get_qmicli_mode(sim_path) ):
-						time.sleep(1)
+						if timeout_count > 5:
+							raise Exception("Could not get the qmicli mode!")
+						print "in the while not: waiting for qmicli reset"
+						time.sleep(20)
+						timeout_count += 1
 					#For potential debugging. We expect SIM mode = 'low-power' here after reset.
-					if 'low-power' != self.__get_qmicli_mode(sim_path):
-						print "Warning, SIM Mode is: " + self.__get_qmicli_mode(sim_path)
+					get_response = self.__get_qmicli_mode(sim_path)
+					if 'low-power' != get_response:
+						print "Warning, SIM Mode is: " + get_response
 					self.__set_qmicli_mode('online', sim_path)
-					time.sleep(10)
 					timeout_count += 1
 					#Time out after a few minutes of trying
-					if timeout_count > 2:
+					if timeout_count > 5:
 						raise Exception("The SIM card could not be set to online mode!")
+		#Looks like we're online! Return true.
+		else:
+			return 1
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
-	def __check_sim_path(self, sim_path):
+	def __check_comm_paths(self, sim_path, usb_path):
 		timeout_count = 0
-		while timeout_count < 30:
+		while timeout_count < 15:
 			#Ensure that path to SIM card exists.
 			try:
 				open(sim_path)
@@ -77,18 +84,33 @@ class Transmitter:
 				return 1
 		raise Exception("The SIM card path " + sim_path + " does not exist!")
 
+		#Check for the existence of /dev/ttyUSB2
+		timeout_count = 0
+		while timeout_count < 15:
+			#Ensure that path to SIM card exists.
+			try:
+				open(usb_path)
+			except IOError:
+				time.sleep(1)
+				timeout_count += 1
+			else:
+				return 1
+		raise Exception("The USB path " + usb_path + " does not exist! Please unplug USB cable from hat/modem and re-plug in.")
+
+
 	#Sets our SIM card to the specified mode (e.g. 'reset', 'online', etc).
 	def __set_qmicli_mode(self, mode, sim_path):
 		#A second to sleep to avoid error like /dev/ttyUSB2 disappearing.
-		time.sleep(1)
-		self.__check_sim_path(sim_path)
+		time.sleep(10)
+		self.__check_comm_paths(sim_path, self.usb_path)
 		os.system("qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
+		time.sleep(10)
 	
 	#Returns SIM card mode (e.g. 'offline', 'online', 'low-power', 'reset', etc.
 	def __get_qmicli_mode(self, sim_path):
 		#A second to sleep to avoid error like /dev/ttyUSB2 disappearing.
 		time.sleep(1)
-		self.__check_sim_path(sim_path)
+		self.__check_comm_paths(sim_path, self.usb_path)
 		get_output = os.popen('qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		output_read = get_output.read()
 		mode_match = re.search("Mode: '([a-z-]+)'", output_read)
