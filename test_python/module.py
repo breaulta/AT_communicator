@@ -81,29 +81,46 @@ class Transmitter:
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
 	def __check_comm_paths(self, sim_path, usb_path):
+		#qmicli clobbers path during 'reset' so the while loop ensures no false negatives.
 		timeout_count = 0
 		while timeout_count < 15:
 			#Ensure that path to SIM card exists.
+			if os.path.exists(sim_path):
+				return 1
+			else:
+				time.sleep(1)
+				timeout_count += 1
+			"""
 			try:
-				open(sim_path)
+				#open(sim_path)
+				os.path.exists(sim_path)
 			except IOError:
 				time.sleep(1)
 				timeout_count += 1
 			else:
 				return 1
+			"""
 		raise Exception("The SIM card path " + sim_path + " does not exist!")
 
 		#Check for the existence of /dev/ttyUSB2
 		timeout_count = 0
 		while timeout_count < 15:
 			#Ensure that path to SIM card exists.
+			if os.path.exists(usb_path):
+				return 1
+			else:
+				time.sleep(1)
+				timeout_count += 1
+			"""
 			try:
-				open(usb_path)
+				#open(usb_path)
+				os.path.exists(usb_path)
 			except IOError:
 				time.sleep(1)
 				timeout_count += 1
 			else:
 				return 1
+			"""
 		raise Exception("The USB path " + usb_path + " does not exist! Please unplug USB cable from hat/modem and re-plug in.")
 
 	def __check_usb_path(self, usb_path, error_description):
@@ -112,14 +129,22 @@ class Transmitter:
 		timeout_count = 0
 		while timeout_count < 15:
 			#Ensure that path to SIM card exists.
+			if os.path.exists(usb_path):
+				return 1
+			else:
+				time.sleep(1)
+				timeout_count += 1
+			"""
 			try:
-				open(usb_path)
+				#open(usb_path)
+				os.path.exists(usb_path)
 			except IOError:
 				time.sleep(1)
 				timeout_count += 1
 			else:
 				print "USB path exists! " + error_description
 				return 1
+			"""
 		print "The USB path " + usb_path + " does not exist. line number:" + error_description
 
 
