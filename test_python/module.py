@@ -33,11 +33,12 @@ class Transmitter:
 		)
 		time.sleep(5)
 		check_AT = self.send_AT('AT')
-		if check_AT != 'AT':
+		regex_result = re.search("^(AT)", sms_mode)
+		if regex_result.group(1) is not None:
+			print "AT communication working!"
+		else:
 			print "AT communication down! Serial probably not connected."
 			print "response: " + check_AT
-		else:
-			print "AT communication working!"
 
 	#Check that the SIM card via the Qmicli interface is connected to the mobile network.
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
