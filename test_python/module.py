@@ -38,7 +38,6 @@ class Transmitter:
 			print "AT communication working!"
 		else:
 			print "AT communication down! Serial probably not connected."
-			print "response: " + check_AT
 
 	#Check that the SIM card via the Qmicli interface is connected to the mobile network.
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
@@ -55,7 +54,7 @@ class Transmitter:
 			#So we close the serial connection while we perform the reset.
 			if self.ser.isOpen() == True:
 				self.ser.close()
-			print "Sim card was off, turning online"
+			print "Sim card was off, turning online."
 			self.__set_qmicli_mode('online', sim_path)
 			timeout_count = 0
 			#Verify that it comes online.
@@ -64,11 +63,11 @@ class Transmitter:
 				sim_mode = self.__get_qmicli_mode(sim_path)
 				if sim_mode == 'online':
 					#We're online! Escape bonds of while loop and return.
-					print "Successfuly set sim card online"
+					print "Successfuly set sim card online."
 					break
 				#Otherwise, let's try to turn it online.
 				else:
-					print "Sim card is being reset to turn it online"
+					print "Sim card is being reset to turn it online."
 					time.sleep(10)
 					self.__set_qmicli_mode('reset', sim_path)
 					time.sleep(30)
@@ -90,7 +89,7 @@ class Transmitter:
 			return 1
 		#Looks like we're online! Return true.
 		else:
-			print "Our SIM card is already online"
+			print "Our SIM card is already online."
 			return 1
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
@@ -109,13 +108,11 @@ class Transmitter:
 	#Sets our SIM card to the specified mode (e.g. 'reset', 'online', etc).
 	def __set_qmicli_mode(self, mode, sim_path):
 		self.__check_sim_path(sim_path)
-		print ("running command: qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 		os.system("qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 	
 	#Returns SIM card mode (e.g. 'offline', 'online', 'low-power', 'reset', etc.
 	def __get_qmicli_mode(self, sim_path):
 		self.__check_sim_path(sim_path)
-		print ('running command: qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		get_output = os.popen('qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		output_read = get_output.read()
 		mode_match = re.search("Mode: '([a-z-]+)'", output_read)
