@@ -34,7 +34,7 @@ class Transmitter:
 		time.sleep(5)
 		check_AT = self.send_AT('AT')
 		if check_AT != 'AT':
-		print "AT communication down! Serial probably not connected."
+			print "AT communication down! Serial probably not connected."
 			print "response: " + check_AT
 		else:
 			print "AT communication working!"
@@ -107,13 +107,13 @@ class Transmitter:
 
 	#Sets our SIM card to the specified mode (e.g. 'reset', 'online', etc).
 	def __set_qmicli_mode(self, mode, sim_path):
-		__check_sim_path(sim_path)
+		self.__check_sim_path(sim_path)
 		print ("running command: qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 		os.system("qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 	
 	#Returns SIM card mode (e.g. 'offline', 'online', 'low-power', 'reset', etc.
 	def __get_qmicli_mode(self, sim_path):
-		__check_sim_path(sim_path)
+		self.__check_sim_path(sim_path)
 		print ('running command: qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		get_output = os.popen('qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		output_read = get_output.read()
