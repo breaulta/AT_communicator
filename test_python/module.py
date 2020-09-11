@@ -36,8 +36,9 @@ class Transmitter:
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
 	#Must run as root
 	def ensure_sim_card_connected_to_network(self, sim_path):
-	#	if self.ser.is_open() == True:
-		self.ser.close()
+		if self.ser.isOpen() == True:
+			print "serial is open! closing..."
+			self.ser.close()
 		print "online"
 		self.__set_qmicli_mode('online', sim_path)
 		time.sleep(20)
