@@ -33,7 +33,7 @@ class Transmitter:
 		)
 		time.sleep(5)
 		check_AT = self.send_AT('AT')
-		regex_result = re.search("^(AT)", sms_mode)
+		regex_result = re.search("^(AT)", check_AT)
 		if regex_result.group(1) is not None:
 			print "AT communication working!"
 		else:
