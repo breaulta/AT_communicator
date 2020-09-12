@@ -24,5 +24,5 @@ for line in rc_local_list:
 
 #insert cd into our main directory
 #insert 'python /path/mainfile.py &'
-#
+#add regex to make see if we've already writen the necessary lines to rc.local
 
