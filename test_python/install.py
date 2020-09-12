@@ -17,7 +17,7 @@ for line in rc_local_list:
 		#print "cd " + run_directory
 		rc_local_fd.write("cd " + run_directory + "\n")
 		#print "sudo python " + run_directory + " " + main_script
-		rc_local_fd.write("sudo python " + run_directory + " " + main_script + "\n")
+		rc_local_fd.write("sudo python " + run_directory + "/" + main_script + "\n")
 	#print "~~~" + line + "~~~"
 	rc_local_fd.write(line + "\n")
 
