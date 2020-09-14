@@ -3,6 +3,7 @@
 import sys
 sys.dont_write_bytecode = True
 import os
+import re
 
 run_directory = "/home/pi/communicator/test_python"
 main_script = "startup_test.py"
