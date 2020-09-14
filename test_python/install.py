@@ -10,8 +10,12 @@ main_script = "startup_test.py"
 rc_local_file = open("/etc/rc.local", "r")
 rc_local_content = rc_local_file.read()
 rc_local_list = rc_local_content.split("\n")
+#Check to make sure we're not installing to rc.local twice
 for line in rc_local_list:
-	
+	if re.search(main_script, line):
+		#don't rewrite lines to rc.local
+		exit(0)
+
 rc_local_file.close()
 rc_local_fd = open("/etc/rc.local", "w")
 for line in rc_local_list:
