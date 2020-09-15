@@ -40,6 +40,39 @@ class Locker:
 		else:
 			self.renewals_used = 0
 
+	#Saves array of SMS objects to json file.
+	def save_locker_obj_to_json_file(self, filename):
+		
+
+		if self.__is_sms_array(text_array):
+			data = {}
+			data['sms'] = []
+			for sms in text_array:
+				data['sms'].append({
+					'index': sms.index,
+					'status': sms.status,
+					'phone': sms.phone,
+					'date': sms.date,
+					'message': sms.message
+				})
+
+			outfile = open(filename, 'w')
+			json.dump(data, outfile)
+			outfile.close()
+	
+	#Returns array of SMS message objects taken from json file.
+	def json_file_to_sms_array(self, filename):
+		json_file = open(filename, 'r')
+		read_data = json.load(json_file)
+		json_file.close()
+		sms_array = []
+		for sms_json in read_data['sms']:
+			sms_obj = SMS(sms_json['index'], sms_json['status'], sms_json['phone'], sms_json['date'], sms_json['message'])
+			sms_array.append(sms_obj)
+		return sms_array
+
+
+
 
 
 #lockers with different passwords
