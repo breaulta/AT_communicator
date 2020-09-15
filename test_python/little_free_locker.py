@@ -5,7 +5,7 @@ import re
 import json
 import os
 
-class Little_free_locker:
+class Locker:
 	def __init__(self, **kwargs):
         if 'name' in kwargs:
             self.name = kwargs['name']
@@ -31,8 +31,6 @@ class Little_free_locker:
 			raise Exception ("The locker needs to know how long to be active per user session.")
         if 'start_date' in kwargs:
             self.start_date = kwargs['start_date']
-        if 'end_date' in kwargs:
-            self.end_date = kwargs['end_date']
         if 'total_renewals_possible' in kwargs:
             self.total_renewals_possible = kwargs['total_renewals_possible']
 		else:
