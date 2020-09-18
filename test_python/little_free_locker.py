@@ -40,36 +40,42 @@ class Locker:
 		else:
 			self.renewals_used = 0
 
-	#Saves array of SMS objects to json file.
 	def save_locker_obj_to_json_file(self, filename):
-		
-
-		if self.__is_sms_array(text_array):
-			data = {}
-			data['sms'] = []
-			for sms in text_array:
-				data['sms'].append({
-					'index': sms.index,
-					'status': sms.status,
-					'phone': sms.phone,
-					'date': sms.date,
-					'message': sms.message
-				})
-
-			outfile = open(filename, 'w')
-			json.dump(data, outfile)
-			outfile.close()
+		data = {}
+		data['locker'] = []
+		#might need to check if these exist or it might error
+		data['locker'].append({
+			'name': locker.name,
+			'combo': locker.combo,
+			'address': locker.address,
+			'host_number': locker.host_number,
+			'current_borrower_number': locker.current_borrower_number,
+			'checkout_time_length': locker.checkout_time_length,
+			'start_date': locker.start_date,
+			'total_renewals_possible': locker.total_renewals_possible,
+			'renewals_used': locker.renewals_used
+		})
+		outfile = open(filename, 'w')
+		json.dump(data, outfile)
+		outfile.close()
 	
-	#Returns array of SMS message objects taken from json file.
-	def json_file_to_sms_array(self, filename):
+	def json_file_to_locker_array(self, filename):
 		json_file = open(filename, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
-		sms_array = []
-		for sms_json in read_data['sms']:
-			sms_obj = SMS(sms_json['index'], sms_json['status'], sms_json['phone'], sms_json['date'], sms_json['message'])
-			sms_array.append(sms_obj)
-		return sms_array
+		for locker_json in read_data['locker']:
+			locker_obj = Locker(
+				locker_json['name'],
+				locker_json['combo'],
+				locker_json['address'],
+				locker_json['host_number'],
+				locker_json['current_borrower_number'],
+				locker_json['checkout_time_length'],
+				locker_json['start_date'],
+				locker_json['total_renewals_possible'],
+				locker_json['renewals_used']
+			)
+		return locker_obj
 
 
 

@@ -189,10 +189,10 @@ class Transmitter:
 	
 	#Deletes text with specified index from SIM card.			
 	def delete_text(self, index):
-		if self._does_message_at_index_exist(index):
+		if self.__does_message_at_index_exist(index):
 			command = 'AT+CMGD=' + index
 			self.send_AT(command)
-			if self._does_message_at_index_exist(index):
+			if self.__does_message_at_index_exist(index):
 				return "text at index '" + index + "' not deleted"
 			else:
 				return "text at index '" + index + "' deleted"
@@ -200,7 +200,7 @@ class Transmitter:
 			return "text at index '" + index + "' not found"
 		
 	#Probes SIM card to see if message at index exists.
-	def _does_message_at_index_exist(self, index):
+	def __does_message_at_index_exist(self, index):
 		sms_list = self.get_all_texts()
 		for sms in sms_list:
 			if sms.index == index:
@@ -210,7 +210,9 @@ class Transmitter:
 	#Saves array of SMS objects to json file.
 	def save_sms_obj_to_json_file(self, text_array, filename):
 		if self.__is_sms_array(text_array):
+			#Create dictionary (hashlike structure)
 			data = {}
+			#Create an array 
 			data['sms'] = []
 			for sms in text_array:
 				data['sms'].append({
@@ -220,7 +222,6 @@ class Transmitter:
 					'date': sms.date,
 					'message': sms.message
 				})
-
 			outfile = open(filename, 'w')
 			json.dump(data, outfile)
 			outfile.close()
