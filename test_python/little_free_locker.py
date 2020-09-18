@@ -45,15 +45,15 @@ class Locker:
 		data['locker'] = []
 		#might need to check if these exist or it might error
 		data['locker'].append({
-			'name': locker.name,
-			'combo': locker.combo,
-			'address': locker.address,
-			'host_number': locker.host_number,
-			'current_borrower_number': locker.current_borrower_number,
-			'checkout_time_length': locker.checkout_time_length,
-			'start_date': locker.start_date,
-			'total_renewals_possible': locker.total_renewals_possible,
-			'renewals_used': locker.renewals_used
+			'name': self.locker.name,
+			'combo': self.locker.combo,
+			'address': self.locker.address,
+			'host_number': self.locker.host_number,
+			'current_borrower_number': self.locker.current_borrower_number,
+			'checkout_time_length': self.locker.checkout_time_length,
+			'start_date': self.locker.start_date,
+			'total_renewals_possible': self.locker.total_renewals_possible,
+			'renewals_used': self.locker.renewals_used
 		})
 		outfile = open(filename, 'w')
 		json.dump(data, outfile)
