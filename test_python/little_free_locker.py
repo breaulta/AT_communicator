@@ -5,6 +5,17 @@ import re
 import json
 import os
 
+#For holding multiple Locker objects.
+#kwargs will hold locker name to locker object.
+class Lockers:
+	def __init__(self, **kwargs):
+		locker_hash = kwargs
+		for locker_name in locker_hash:
+			print "locker name: " + locker_name
+		
+		
+
+#kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, **kwargs):
 		if 'name' in kwargs:
@@ -45,39 +56,35 @@ class Locker:
 		data['locker'] = []
 		#might need to check if these exist or it might error
 		data['locker'].append({
-			'name': self.locker.name,
-			'combo': self.locker.combo,
-			'address': self.locker.address,
-			'host_number': self.locker.host_number,
-			'current_borrower_number': self.locker.current_borrower_number,
-			'checkout_time_length': self.locker.checkout_time_length,
-			'start_date': self.locker.start_date,
-			'total_renewals_possible': self.locker.total_renewals_possible,
-			'renewals_used': self.locker.renewals_used
+			'name': self.name,
+			'combo': self.combo,
+			'address': self.address,
+			'host_number': self.host_number,
+			'current_borrower_number': self.current_borrower_number,
+			'checkout_time_length': self.checkout_time_length,
+			'start_date': self.start_date,
+			'total_renewals_possible': self.total_renewals_possible,
+			'renewals_used': self.renewals_used
 		})
 		outfile = open(filename, 'w')
 		json.dump(data, outfile)
 		outfile.close()
 	
-	def json_file_to_locker_array(self, filename):
+	def json_file_to_locker_obj(self, filename):
 		json_file = open(filename, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
-		for locker_json in read_data['locker']:
-			locker_obj = Locker(
-				locker_json['name'],
-				locker_json['combo'],
-				locker_json['address'],
-				locker_json['host_number'],
-				locker_json['current_borrower_number'],
-				locker_json['checkout_time_length'],
-				locker_json['start_date'],
-				locker_json['total_renewals_possible'],
-				locker_json['renewals_used']
-			)
-		return locker_obj
-
-
+		#get list of lockers:
+		locker_list = read_data['locker']
+		#loop through first locker of list and append to object:
+		repopulated_attributes = {}
+		for locker_obj_attribute in locker_list[0]:
+			key_to_value = locker_list[0][locker_obj_attribute]
+			repopulated_attributes[locker_obj_attribute] = str(key_to_value)
+		#Add attributes to new locker object.
+		new_locker_obj = Locker(**repopulated_attributes)
+		self = new_locker_obj
+		return self
 
 
 
