@@ -22,5 +22,10 @@ locker2 = lkr.name
 print "will the real locker stand up: " + locker1
 
 #Python treating locker1 and locker2 here as strings, not interpolating them as variables as would be expected in Perl.
-big_lockers = Lockers(locker1 = locker, locker2 = lkr)
+args = {
+	locker.name: locker,
+	lkr.name: lkr
+}
+#big_lockers = Lockers(locker1 = locker, locker2 = lkr)
+big_lockers = Lockers(args)
 #big_lockers = Lockers()
