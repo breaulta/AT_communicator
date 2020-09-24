@@ -24,3 +24,14 @@ lockers_obj.add_locker(locker2)
 
 lockers_obj.print_lockers()
 lockers_obj.save_lockers_to_json_file("lockers_output.dat")
+
+new_lockers_obj = Lockers()
+new_lockers_obj.json_file_to_lockers_obj("lockers_output.dat")
+
+
+
+
+
+
+
+

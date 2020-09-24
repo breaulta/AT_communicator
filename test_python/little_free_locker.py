@@ -31,24 +31,22 @@ class Lockers:
 
 
 	def json_file_to_lockers_obj(self, filename):
-
-def json_file_to_locker_obj(self, filename):
 		json_file = open(filename, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
 		#get list of lockers:
-		locker_list = read_data['locker']
+		locker_list = read_data['lockers']
 		#loop through first locker of list and append to object:
-		repopulated_attributes = {}
-		for locker_obj_attribute in locker_list[0]:
-			key_to_value = locker_list[0][locker_obj_attribute]
-			repopulated_attributes[locker_obj_attribute] = str(key_to_value)
-		#Add attributes to new locker object.
-		new_locker_obj = Locker(**repopulated_attributes)
-		self = new_locker_obj
-		return self
-
-
+		for locker in locker_list:
+			locker_dict = {}
+			for locker_obj_attribute in locker:
+				key_to_value = locker[locker_obj_attribute]
+				locker_dict[locker_obj_attribute] = str(key_to_value)
+			#Add attributes to new locker object.
+			new_locker_obj = Locker(**locker_dict)
+			#Add to Lockers list of lockers
+			self.add_locker(new_locker_obj)
+			
 
 	
 
