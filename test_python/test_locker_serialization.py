@@ -29,7 +29,7 @@ new_lockers_obj = Lockers()
 new_lockers_obj.json_file_to_lockers_obj("lockers_output.dat")
 
 
-
+new_lockers_obj.print_lockers()
 
 
 
