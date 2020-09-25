@@ -1,5 +1,6 @@
 #!/usr/bin/python
 #Don't create a pesky .pyc file.
+import re
 import sys
 sys.dont_write_bytecode = True
 from little_free_locker import Locker
@@ -19,10 +20,10 @@ locker2 = Locker(name='testlock2', combo='32.51.0', address='1000 main street', 
 filename = "template.txt"
 infile = open(filename, 'r')
 for line in infile:
-	print "line: " + line
-	m = re.search('^(w+)\:(.+)\s+\#', line)
+#	print "line: " + line
+	m = re.search('^(\w+)\:(.+)\s+\#', line)
 	if m:
-		print "key: " + m.groups()[0] + "value: " + m.groups()[1]
+		print "key: " + m.groups()[0] + "                value: " + m.groups()[1]
 
 infile.close()
 
