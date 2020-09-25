@@ -18,17 +18,14 @@ class Lockers:
 		for locker in self.lockers:
 			print locker.name
 
-
 	def save_lockers_to_json_file(self, filename):
 		locker_to_json = {}
 		locker_to_json['lockers'] = []
 		for locker in self.lockers:
 			locker_to_json['lockers'].append( vars(locker) ) #vars converts Locker object to dict
-
 		outfile = open(filename, 'w')
 		json.dump(locker_to_json, outfile)
 		outfile.close()
-
 
 	def json_file_to_lockers_obj(self, filename):
 		json_file = open(filename, 'r')
@@ -46,10 +43,6 @@ class Lockers:
 			new_locker_obj = Locker(**locker_dict)
 			#Add to Lockers list of lockers
 			self.add_locker(new_locker_obj)
-			
-
-	
-
 
 #kwargs will hold locker attributes and values.
 class Locker:
@@ -86,42 +79,6 @@ class Locker:
 			self.renewals_used = kwargs['renewals_used']
 		else:
 			self.renewals_used = 0
-
-	def save_locker_obj_to_json_file(self, filename):
-		data = {}
-		data['locker'] = []
-		#might need to check if these exist or it might error
-		data['locker'].append({
-			'name': self.name,
-			'combo': self.combo,
-			'address': self.address,
-			'host_number': self.host_number,
-			'current_borrower_number': self.current_borrower_number,
-			'checkout_time_length': self.checkout_time_length,
-			'start_date': self.start_date,
-			'total_renewals_possible': self.total_renewals_possible,
-			'renewals_used': self.renewals_used
-		})
-		outfile = open(filename, 'w')
-		json.dump(data, outfile)
-		outfile.close()
-	
-	def json_file_to_locker_obj(self, filename):
-		json_file = open(filename, 'r')
-		read_data = json.load(json_file)
-		json_file.close()
-		#get list of lockers:
-		locker_list = read_data['locker']
-		#loop through first locker of list and append to object:
-		repopulated_attributes = {}
-		for locker_obj_attribute in locker_list[0]:
-			key_to_value = locker_list[0][locker_obj_attribute]
-			repopulated_attributes[locker_obj_attribute] = str(key_to_value)
-		#Add attributes to new locker object.
-		new_locker_obj = Locker(**repopulated_attributes)
-		self = new_locker_obj
-		return self
-
 
 
 #lockers with different passwords

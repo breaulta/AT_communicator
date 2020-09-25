@@ -1,0 +1,6 @@
+name:Lenron					#A name for your locker(please make it one word with no punctuation or spaces)
+combo:10-11-34					#This is the combo for the locker
+address:1234 testing rd bend or, 97702		#The address where your locker resides
+host_number:503-989-5540	#Your contact number for the system
+checkout_time_length:7		#The number of days the locker can be checked out for
+total_renewals_possible:1	#The number of times someone can renew their checked out locker
