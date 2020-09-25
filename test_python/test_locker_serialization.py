@@ -37,6 +37,7 @@ print "name: " + locker_read_in.name
 
 
 
+#Next time add support for multiple lockers in the template
 
 
 
