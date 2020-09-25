@@ -31,7 +31,7 @@ for line in infile:
 
 infile.close()
 
-locker_read_in = Locker(locker_in_data)
+locker_read_in = Locker(**locker_in_data)
 
 
 
