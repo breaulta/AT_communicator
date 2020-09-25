@@ -16,6 +16,7 @@ locker2 = Locker(name='testlock2', combo='32.51.0', address='1000 main street', 
 
 
 
+locker_in_data = {}
 filename = "template.txt"
 infile = open(filename, 'r')
 for line in infile:
@@ -23,11 +24,12 @@ for line in infile:
 	m = re.search('^(w+)\:(.+)\s+\#', line)
 	if m:
 		print "key: " + m.groups()[0] + "value: " + m.groups()[1]
-
+		locker_key = m.groups()[0]
+		locker_value = m.groups()[1]
+		locker_in_data.update({locker_key:locker_value})
 infile.close()
 
-
-
+locker_read_in = Locker(locker_in_data)
 
 
 
