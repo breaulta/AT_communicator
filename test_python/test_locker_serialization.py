@@ -20,6 +20,9 @@ filename = "template.txt"
 infile = open(filename, 'r')
 for line in infile:
 	print "line: " + line
+	m = re.search('^(w+)\:(.+)\s+\#', line)
+	if m:
+		print "key: " + m.groups()[0] + "value: " + m.groups()[1]
 
 infile.close()
 
