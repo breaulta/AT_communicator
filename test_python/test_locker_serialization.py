@@ -33,7 +33,7 @@ infile.close()
 
 locker_read_in = Locker(**locker_in_data)
 
-
+print "name: " + locker_read_in.name
 
 
 
