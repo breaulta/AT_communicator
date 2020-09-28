@@ -44,6 +44,37 @@ class Lockers:
 			#Add to Lockers list of lockers
 			self.add_locker(new_locker_obj)
 
+	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
+		#Hash to hold data gleaned from file for each locker.
+		locker_in_data = {}
+		infile = open(locker_template_filename, 'r')
+		for line in infile:
+			#Search for parameters of locker.
+			m = re.search('^(\w+)\:\"(.+)\"$', line)
+			#We found 'name' the beginning of locker parameters.
+			if m:
+				if m.groups()[0] == 'name':
+					#Test if we have a different locker stored.
+					if locker_in_data:
+						#If so, add it to the Lockers object.
+						self.add_locker( Locker(**locker_in_data) )
+					locker_in_data = {} #Reset for new locker.
+					locker_key = m.groups()[0]
+					locker_value = m.groups()[1]
+					locker_in_data.update({locker_key:locker_value})
+				#We found a different locker aspect from 'name'.
+				else:
+					locker_key = m.groups()[0]
+					locker_value = m.groups()[1]
+					locker_in_data.update({locker_key:locker_value})
+			#We did not match, move onto the next locker or to the end of file.
+			else:
+				continue
+		if locker_in_data:
+			self.add_locker( Locker(**locker_in_data) )
+		infile.close()
+
+
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, **kwargs):
@@ -74,11 +105,11 @@ class Locker:
 		if 'total_renewals_possible' in kwargs:
 			self.total_renewals_possible = kwargs['total_renewals_possible']
 		else:
-			self.total_renewals_possible = 0
+			self.total_renewals_possible = "0"
 		if 'renewals_used' in kwargs:
 			self.renewals_used = kwargs['renewals_used']
 		else:
-			self.renewals_used = 0
+			self.renewals_used = "0"
 
 
 #lockers with different passwords

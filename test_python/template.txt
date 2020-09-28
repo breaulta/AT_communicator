@@ -1,21 +1,27 @@
-name:Lenron					#A name for your locker(please make it one word with no punctuation or spaces)
-combo:10-11-34					#This is the combo for the locker
-address:1234 testing rd bend or, 97702		#The address where your locker resides
-host_number:503-989-5540	#Your contact number for the system
-checkout_time_length:7		#The number of days the locker can be checked out for
-total_renewals_possible:1	#The number of times someone can renew their checked out locker
+#The name the user texts to the locker phone number to get the combo.
+name:"Lenron"
+#The combo to be given to the user.
+combo:"10-11-34"
+#The address where the locker can be found.
+address:"4321 testing rd bend or, 97702"
+#Your number, for locker updates.
+host_number:"503-989-5540"
+#The number of days the locker can be checked out.
+checkout_time_length:"7"
+#The number of renewals on locker checkouts.
+total_renewals_possible:"1"
 
-name:LeBron					#A name for your locker(please make it one word with no punctuation or spaces)
-combo:20-13-14					#This is the combo for the locker
-address:4321 testing rd bend or, 97702		#The address where your locker resides
-host_number:503-989-5555	#Your contact number for the system
-checkout_time_length:7		#The number of days the locker can be checked out for
-total_renewals_possible:1	#The number of times someone can renew their checked out locker
+name:"LeBron"
+combo:"20-13-14"
+address:"4321 testing rd bend or, 97702"
+host_number:"503-989-5555"
+checkout_time_length:"7"
+total_renewals_possible:"1"
 
-name:Nala  					#A name for your locker(please make it one word with no punctuation or spaces)
-combo:10-11-34					#This is the combo for the locker
-address:1234 testing rd bend or, 97702		#The address where your locker resides
-host_number:503-989-5540	#Your contact number for the system
-checkout_time_length:7		#The number of days the locker can be checked out for
-total_renewals_possible:1	#The number of times someone can renew their checked out locker
+name:"Nala"
+combo:"10-11-34"
+address:"1234 testing rd bend or, 97702"
+host_number:"503-989-5540"
+checkout_time_length:"7"
+total_renewals_possible:"1"
 

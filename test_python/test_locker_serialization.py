@@ -15,26 +15,22 @@ locker2 = Locker(name='testlock2', combo='32.51.0', address='1000 main street', 
 #reload them
 #lkr = Locker
 
+lockerobj_from_user_file = Lockers()
+lockerobj_from_user_file.load_lockers_from_user_input_txt_file("template.txt")
+
+lockerobj_from_user_file.print_lockers()
+lockerobj_from_user_file.save_lockers_to_json_file('saving_lockers_to_json.txt')
 
 
-locker_in_data = {}
-filename = "template.txt"
-infile = open(filename, 'r')
-for line in infile:
-#	print "line: " + line
-	
-	m = re.search('^(\w+)\:(.+)\s+\#', line)
-	if m:
-		print "key: " + m.groups()[0] + "		value: " + m.groups()[1]
-		locker_key = m.groups()[0]
-		locker_value = m.groups()[1]
-		locker_in_data.update({locker_key:locker_value})
 
-infile.close()
+#print "key: " + m.groups()[0] + "		value: " + m.groups()[1]
+#m = re.search('^(\w+)\:(.+)\s+\#', line)
+#raise Exception("Did not find a locker in " + locker_template_filename)
 
-locker_read_in = Locker(**locker_in_data)
 
-print "name: " + locker_read_in.name
+#locker_read_in = Locker(**locker_in_data)
+
+#print "name: " + locker_read_in.name
 
 
 
