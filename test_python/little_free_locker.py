@@ -28,6 +28,7 @@ class Lockers:
 		outfile.close()
 
 	def json_file_to_lockers_obj(self, filename):
+#It's ok if it hasn't been created yet, test for existence, and exit here.
 		json_file = open(filename, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
@@ -45,6 +46,7 @@ class Lockers:
 			self.add_locker(new_locker_obj)
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
+#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
 		infile = open(locker_template_filename, 'r')
