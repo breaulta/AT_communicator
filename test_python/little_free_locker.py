@@ -5,6 +5,8 @@ import re
 import json
 import os
 
+json_database = "locker_database.json"
+
 #For holding multiple Locker objects.
 #kwargs will hold locker name to locker object.
 class Lockers:
@@ -18,18 +20,26 @@ class Lockers:
 		for locker in self.lockers:
 			print locker.name
 
-	def save_lockers_to_json_file(self, filename):
+	def does_locker_name_exist(self, name):
+		for locker in self.lockers:
+			if name == locker.name:
+				return 1
+		return 0
+
+	def save_lockers_to_json_file(self):
 		locker_to_json = {}
 		locker_to_json['lockers'] = []
 		for locker in self.lockers:
 			locker_to_json['lockers'].append( vars(locker) ) #vars converts Locker object to dict
-		outfile = open(filename, 'w')
+		outfile = open(json_database, 'w')
 		json.dump(locker_to_json, outfile)
 		outfile.close()
 
-	def json_file_to_lockers_obj(self, filename):
-#It's ok if it hasn't been created yet, test for existence, and exit here.
-		json_file = open(filename, 'r')
+	def json_file_to_lockers_obj(self):
+		#It's ok if it hasn't been created yet, test for existence, and exit here.
+		if not os.isfile(json_database):
+			return	
+		json_file = open(json_database, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
 		#get list of lockers:
@@ -47,6 +57,8 @@ class Lockers:
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
 #First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
+		#read in json first
+		self.json_file_to_lockers_obj()
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
 		infile = open(locker_template_filename, 'r')
@@ -56,6 +68,9 @@ class Lockers:
 			#We found 'name' the beginning of locker parameters.
 			if m:
 				if m.groups()[0] == 'name':
+					#Test if this locker has already been added to database.
+					if self.does_locker_name_exist(m.groups()[1]):
+						continue
 					#Test if we have a different locker stored.
 					if locker_in_data:
 						#If so, add it to the Lockers object.
@@ -66,9 +81,13 @@ class Lockers:
 					locker_in_data.update({locker_key:locker_value})
 				#We found a different locker aspect from 'name'.
 				else:
-					locker_key = m.groups()[0]
-					locker_value = m.groups()[1]
-					locker_in_data.update({locker_key:locker_value})
+					#If no name here, it's not a valid locker object, so move on.
+					if locker_in_data("name"):
+						locker_key = m.groups()[0]
+						locker_value = m.groups()[1]
+						locker_in_data.update({locker_key:locker_value})
+					else:
+						continue
 			#We did not match, move onto the next locker or to the end of file.
 			else:
 				continue
