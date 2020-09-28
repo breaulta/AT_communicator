@@ -82,7 +82,7 @@ class Lockers:
 				#We found a different locker aspect from 'name'.
 				else:
 					#If no name here, it's not a valid locker object, so move on.
-					if locker_in_data("name"):
+					if locker_in_data.has_key("name"):
 						locker_key = m.groups()[0]
 						locker_value = m.groups()[1]
 						locker_in_data.update({locker_key:locker_value})
