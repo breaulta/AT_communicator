@@ -37,7 +37,7 @@ class Lockers:
 
 	def json_file_to_lockers_obj(self):
 		#It's ok if it hasn't been created yet, test for existence, and exit here.
-		if not os.isfile(json_database):
+		if not os.path.isfile(json_database):
 			return	
 		json_file = open(json_database, 'r')
 		read_data = json.load(json_file)
