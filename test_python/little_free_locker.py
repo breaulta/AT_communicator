@@ -90,16 +90,16 @@ class Lockers:
 					else:
 						locker_names_in_template_file.append(locker_name) 
 					#Test if this locker has already been added to database.
-					if self.does_locker_name_exist(locker_name):
-						continue
-					#Test if we have a different locker stored.
+					#if self.does_locker_name_exist(locker_name):
+					#	continue
+					#We're on a new locker in our template file.
+					#Write stored data from previous loop to lockers object. 
 					if locker_in_data:
 						#If so, add it to the Lockers object.
 						self.add_locker( Locker(**locker_in_data) )
+					#Start populating new locker hash(dict).
 					locker_in_data = {} #Reset for new locker.
-					locker_key = m.groups()[0]
-					locker_value = m.groups()[1]
-					locker_in_data.update({locker_key:locker_value})
+					locker_in_data.update({"name":locker_name})
 				#We found a different locker aspect from 'name'.
 				else:
 					#If no name here, it's not a valid locker object, so move on.
