@@ -77,7 +77,7 @@ class Lockers:
 		self.json_file_to_lockers_obj()
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
-		check_for_locker_name_duplicates = []
+		locker_names_in_template_file = []
 		infile = open(locker_template_filename, 'r')
 		for line in infile:
 			#Search for parameters of locker.
@@ -87,10 +87,10 @@ class Lockers:
 				if m.groups()[0] == 'name':
 					locker_name = m.groups()[1]
 					#Check to make sure that two lockers with the same name don't appear in template file.
-					if locker_name in check_for_locker_name_duplicates:
+					if locker_name in locker_names_in_template_file:
 						raise Exception("Locker name " + locker_name + " appears more than once in the file!")
 					else:
-						check_for_locker_name_duplicates.append(locker_name) 
+						locker_names_in_template_file.append(locker_name) 
 					#Test if this locker has already been added to database.
 					if self.does_locker_name_exist(locker_name):
 						continue
@@ -114,6 +114,11 @@ class Lockers:
 			#We did not match, move onto the next locker or to the end of file.
 			else:
 				continue
+		#Remove any lockers not represented in the template file (master).
+		for locker in self.lockers:
+			if locker.name not in locker_names_in_template_file:
+				self.remove_locker(locker)
+		#Adding the last locker in the template file to our lockers object.
 		if locker_in_data:
 			self.add_locker( Locker(**locker_in_data) )
 		infile.close()

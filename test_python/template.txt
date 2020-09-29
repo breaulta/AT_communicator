@@ -11,13 +11,6 @@ checkout_time_length:"7"
 #The number of renewals on locker checkouts.
 total_renewals_possible:"1"
 
-name:"Jbuckets"
-combo:"20-13-14"
-address:"4321 testing rd bend or, 97702"
-host_number:"503-989-5555"
-checkout_time_length:"7"
-total_renewals_possible:"1"
-
 name:"Nala"
 combo:"10-11-34"
 address:"1234 testing rd bend or, 97702"
