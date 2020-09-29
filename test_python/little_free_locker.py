@@ -66,6 +66,22 @@ class Lockers:
 			#Add to Lockers list of lockers
 			self.add_locker(new_locker_obj)
 
+	#Update lockers retrieved from .json database with new attributes from template file.
+	def populate_locker_attributes_from_template(self, locker_data_from_template_file):
+		locker_name = locker_data_from_template_file['name']
+		#Test if the locker already exists in our Lockers object
+		if self.does_locker_name_exist(locker_name):
+			locker_obj = self.get_locker_obj_given_locker_name(locker_name)
+			#Remove the old version of the Locker object.
+			self.remove_locker(locker_obj)
+			for attribute in locker_data_from_template_file:
+				setattr(locker_obj, attribute, locker_data_from_template_file[attribute])
+			#Add our new version of the Locker object back onto the Lockers object.
+			self.add_locker(locker_obj)
+		#If it doesn't exist, create it anew.
+		else:
+			self.add_locker( Locker(**locker_in_data) )
+
 #FOR NEXT TIME:
 #Also, we want to be overwriting any Locker attributes that are specified in the template file
 #(e.g. the user changes the combo)
@@ -95,8 +111,16 @@ class Lockers:
 					#We're on a new locker in our template file.
 					#Write stored data from previous loop to lockers object. 
 					if locker_in_data:
-						#If so, add it to the Lockers object.
-						self.add_locker( Locker(**locker_in_data) )
+						self.populate_locker_attributes_from_template(locker_in_data)
+
+
+						#Test if this locker has already been added to json database.
+						#if self.does_locker_name_exist(locker_name):
+							#If we already have this Locker, update it with any new data from template file.
+						#	self._update_locker_from_template_file(locker_name, locker_in_data)
+						#Locker is a new locker, so add it to the Lockers object.
+						#else:
+						#	self.add_locker( Locker(**locker_in_data) )
 					#Start populating new locker hash(dict).
 					locker_in_data = {} #Reset for new locker.
 					locker_in_data.update({"name":locker_name})
@@ -118,7 +142,7 @@ class Lockers:
 				self.remove_locker(locker)
 		#Adding the last locker in the template file to our lockers object.
 		if locker_in_data:
-			self.add_locker( Locker(**locker_in_data) )
+			self.populate_locker_attributes_from_template(locker_in_data)
 		infile.close()
 		#Write any changes to Lockers object to json database.
 		self.save_lockers_to_json_file()

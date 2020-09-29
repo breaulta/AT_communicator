@@ -8,15 +8,15 @@ from little_free_locker import Lockers
 
 
 lockerobj_from_user_file = Lockers()
-lockerobj_from_user_file.json_file_to_lockers_obj()
+#lockerobj_from_user_file.json_file_to_lockers_obj()
 lockerobj_from_user_file.load_lockers_from_user_input_txt_file("template.txt")
-lockerobj_from_user_file.print_lockers()
+#lockerobj_from_user_file.print_lockers()
 
 
 
 
-lockerobj_from_user_file.json_file_to_lockers_obj()
-print "\n\n"
+#lockerobj_from_user_file.json_file_to_lockers_obj()
+#print "\n\n"
 
 #lockerobj_from_user_file.load_lockers_from_user_input_txt_file("template.txt")
 #lockerobj_from_user_file.print_lockers()
