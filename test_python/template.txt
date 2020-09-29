@@ -18,3 +18,11 @@ host_number:"503-989-5540"
 checkout_time_length:"7"
 total_renewals_possible:"1"
 
+name:"3rd"
+combo:"10-11-34"
+address:"1234 testing rd bend or, 97702"
+host_number:"503-989-5540"
+checkout_time_length:"7"
+total_renewals_possible:"1"
+
+

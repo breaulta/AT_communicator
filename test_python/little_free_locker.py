@@ -61,14 +61,12 @@ class Lockers:
 				locker_dict[locker_obj_attribute] = str(key_to_value)
 			#Add attributes to new locker object.
 			new_locker_obj = Locker(**locker_dict)
+			if self.does_locker_name_exist(new_locker_obj.name):
+				continue
 			#Add to Lockers list of lockers
 			self.add_locker(new_locker_obj)
 
 #FOR NEXT TIME:
-#After we load in the json file locker list, make sure that all of the lockers in the json file
-#are still present in the template file.
-#If a locker name has been removed from the template file, remove it from our Lockers object.
-
 #Also, we want to be overwriting any Locker attributes that are specified in the template file
 #(e.g. the user changes the combo)
 
@@ -122,7 +120,8 @@ class Lockers:
 		if locker_in_data:
 			self.add_locker( Locker(**locker_in_data) )
 		infile.close()
-
+		#Write any changes to Lockers object to json database.
+		self.save_lockers_to_json_file()
 
 #kwargs will hold locker attributes and values.
 class Locker:
