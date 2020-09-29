@@ -16,9 +16,18 @@ class Lockers:
 	def add_locker(self, locker):
 		self.lockers.append(locker)
 
+	def remove_locker(self, locker):
+		self.lockers.remove(locker)
+
 	def print_lockers(self):
 		for locker in self.lockers:
 			print locker.name
+
+	def get_locker_obj_given_locker_name(self, locker_name):
+		for locker in self.lockers:
+			if locker_name == locker.name:
+				return locker
+		print "The locker with name " + locker_name + "was not found."
 
 	def does_locker_name_exist(self, name):
 		for locker in self.lockers:
@@ -55,20 +64,20 @@ class Lockers:
 			#Add to Lockers list of lockers
 			self.add_locker(new_locker_obj)
 
-	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
-		#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
-		self.json_file_to_lockers_obj()
 #FOR NEXT TIME:
 #After we load in the json file locker list, make sure that all of the lockers in the json file
 #are still present in the template file.
 #If a locker name has been removed from the template file, remove it from our Lockers object.
-#This will mean creating the subroutine "remove_locker"
 
 #Also, we want to be overwriting any Locker attributes that are specified in the template file
 #(e.g. the user changes the combo)
 
+	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
+		#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
+		self.json_file_to_lockers_obj()
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
+		check_for_locker_name_duplicates = []
 		infile = open(locker_template_filename, 'r')
 		for line in infile:
 			#Search for parameters of locker.
@@ -76,8 +85,14 @@ class Lockers:
 			#We found 'name' the beginning of locker parameters.
 			if m:
 				if m.groups()[0] == 'name':
+					locker_name = m.groups()[1]
+					#Check to make sure that two lockers with the same name don't appear in template file.
+					if locker_name in check_for_locker_name_duplicates:
+						raise Exception("Locker name " + locker_name + " appears more than once in the file!")
+					else:
+						check_for_locker_name_duplicates.append(locker_name) 
 					#Test if this locker has already been added to database.
-					if self.does_locker_name_exist(m.groups()[1]):
+					if self.does_locker_name_exist(locker_name):
 						continue
 					#Test if we have a different locker stored.
 					if locker_in_data:
