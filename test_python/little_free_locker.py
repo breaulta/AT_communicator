@@ -56,9 +56,17 @@ class Lockers:
 			self.add_locker(new_locker_obj)
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
-#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
-		#read in json first
+		#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
 		self.json_file_to_lockers_obj()
+#FOR NEXT TIME:
+#After we load in the json file locker list, make sure that all of the lockers in the json file
+#are still present in the template file.
+#If a locker name has been removed from the template file, remove it from our Lockers object.
+#This will mean creating the subroutine "remove_locker"
+
+#Also, we want to be overwriting any Locker attributes that are specified in the template file
+#(e.g. the user changes the combo)
+
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
 		infile = open(locker_template_filename, 'r')
