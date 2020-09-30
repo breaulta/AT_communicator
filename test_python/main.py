@@ -44,9 +44,11 @@ while(1):
 				if m:
 					if m.groups()[0] == locker.name:
 						#send combo
-						print "text received: " + m.groups()[0]	
+						print "group matched: ~" + m.groups()[0] + "~"
 						#set timer based on checkout time.
 						#record/notify that this locker has been checked out.
+					else:
+						print "group didn't match for some reason"
 				else:
 					print "text received but not caught by regex :("
 	time.sleep(5)
