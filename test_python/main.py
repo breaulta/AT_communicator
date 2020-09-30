@@ -23,6 +23,8 @@ tx = Transmitter(port = '/dev/ttyUSB2')
 
 #infinite loop
 while(1):
+	
+	tx.ensure_sim_card_connected_to_network("/dev/cdc-wdm0")
 	#Read in any potential new texts (incoming sms).
 	new_sms_array = tx.get_all_texts()
 
@@ -32,6 +34,22 @@ while(1):
 		tx.delete_texts_from_sim_card(new_sms_array)
 		#Little free locker response to new texts
 		#locker.respond_to_new_texts(tx, new_sms_array)
+		#Incoming sms should be only the name of the locker they're trying to checkout.
+		for sms in new_sms_array:
+			print "received sms message: ~" + sms.message + "~"
+			for locker in main_lockers.lockers:
+				#maybe regex here to clean up incoming sms.
+				m = re.search('^\s*\b(.+)\b\s*$', sms.message)
+				#We found 'name' the beginning of locker parameters.
+				if m:
+					if m.groups()[0] == locker.name:
+						#send combo
+						print "text received: " + m.groups()[0]	
+						#set timer based on checkout time.
+						#record/notify that this locker has been checked out.
+				else:
+					print "text received but not caught by regex :("
+	time.sleep(5)
 
 
 #check for incoming sms messages

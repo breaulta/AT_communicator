@@ -20,8 +20,6 @@ class Transmitter:
 		self.usb_path = defined_port
 		self.__configure_ser_connection_to_usb(self.usb_path)
 
-	#TO DO: CHECK THAT SIM_PATH EXISTS BEFORE qmicli commands
-
 	#Configure serial connection settings.
 	def __configure_ser_connection_to_usb(self, usb_port):
 		self.ser = serial.Serial(
@@ -89,7 +87,7 @@ class Transmitter:
 			return 1
 		#Looks like we're online! Return true.
 		else:
-			print "Our SIM card is already online."
+			#print "Our SIM card is already online."
 			return 1
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
