@@ -39,7 +39,7 @@ while(1):
 			print "received sms message: ~" + sms.message + "~"
 			for locker in main_lockers.lockers:
 				#maybe regex here to clean up incoming sms.
-				m = re.search('^\s*\b(.+)\b\s*$', sms.message)
+				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message, IGNORECASE)
 				#We found 'name' the beginning of locker parameters.
 				if m:
 					if m.groups()[0] == locker.name:
