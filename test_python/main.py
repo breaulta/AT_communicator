@@ -26,10 +26,12 @@ while(1):
 	
 	tx.ensure_sim_card_connected_to_network("/dev/cdc-wdm0")
 	#Read in any potential new texts (incoming sms).
+	print "We're running get all texts now!"
 	new_sms_array = tx.get_all_texts()
 
 	#Check if we have new texts...
 	if len(new_sms_array) > 0:
+		print "We have new messages!"
 		tx.append_texts_to_db_file(new_sms_array, sms_database_filename)
 		tx.delete_texts_from_sim_card(new_sms_array)
 		#Little free locker response to new texts
@@ -39,10 +41,10 @@ while(1):
 			print "received sms message: ~" + sms.message + "~"
 			for locker in main_lockers.lockers:
 				#maybe regex here to clean up incoming sms.
-				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message, re.IGNORECASE)
-				#We found 'name' the beginning of locker parameters.
+				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
-					if m.groups()[0] == locker.name:
+					#If we matched the 'name' case-insensitively at the beginning of locker parameters.
+					if m.groups()[0].lower() == locker.name.lower():
 						#send combo
 						print "group matched: ~" + m.groups()[0] + "~"
 						#set timer based on checkout time.
@@ -51,7 +53,7 @@ while(1):
 						print "group didn't match for some reason"
 				else:
 					print "text received but not caught by regex :("
-	time.sleep(5)
+	time.sleep(15)
 
 
 #check for incoming sms messages

@@ -177,7 +177,8 @@ class Transmitter:
 				message = re_result.group(5)
 				#Remove newlines from all messages and the 'OK' AT command from the last message.
 				if text_array_index == len(text_array) - 1:
-					message = re.sub('[\r\n]+OK\r\n$', '', message)
+					#'.*' at end removes +Class0 status messages (we hope).
+					message = re.sub('[\r\n]+OK\r\n.*$', '', message)
 				else:
 					message = re.sub('[\r\n]+$', '', message)
 				#Put each SMS in message array.
