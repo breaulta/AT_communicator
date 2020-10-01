@@ -45,9 +45,12 @@ while(1):
 				if m:
 					#If we matched the 'name' case-insensitively at the beginning of locker parameters.
 					if m.groups()[0].lower() == locker.name.lower():
+						#print "group matched: ~" + m.groups()[0] + "~"
+						#set timer based on checkout time. probably use 'datetime' package
 						#send combo
-						print "group matched: ~" + m.groups()[0] + "~"
-						#set timer based on checkout time.
+						#locker.send_text(number, message)
+						message = "You've checked out locker '" + locker.name + "' until " + date ". Combo: " + locker.combo
+						print "sending text. number:~" + sms.phone + "~ message:~" + message + "~"
 						#record/notify that this locker has been checked out.
 					else:
 						print "group didn't match for some reason"
