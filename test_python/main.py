@@ -55,7 +55,7 @@ while(1):
 						print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
 
 						#send combo
-						message = "You've checked out locker '" + locker.name + "' until " + due_date + ". Combo: " + locker.combo
+						message = "You've checked out locker '" + locker.name + "' until " + due_date.strftime('%d, %b.. %Y') + ". Combo: " + locker.combo
 						#tx.send_text(number, message)
 						print "sending text. number:~" + sms.phone + "~ message:~" + message + "~"
 						#record/notify that this locker has been checked out.
