@@ -3,3 +3,4 @@ rework load_lockers_from_user_input_txt_file
 rework locker init
 add logging
 update user of time left
+add update_locker sub
