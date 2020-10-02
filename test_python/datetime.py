@@ -15,9 +15,10 @@ from little_free_locker import Locker
 from little_free_locker import Lockers
 
 now = datetime.now()
+print "test if this is string: ~" + now.strftime('%d, %b.. %Y') + "~"`
 
 delta = timedelta(days=7)
 
 dude_date = now + delta
 
-print "now: " + now + " delta: " + delta + " dude_date: " + due_date
+#print "now: " + now + " delta: " + delta + " dude_date: " + due_date

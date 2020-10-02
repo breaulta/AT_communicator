@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import time
+from datetime import datetime, timedelta
 import serial
 import re
 import json
@@ -47,6 +48,8 @@ while(1):
 					if m.groups()[0].lower() == locker.name.lower():
 						#print "group matched: ~" + m.groups()[0] + "~"
 						#set timer based on checkout time. probably use 'datetime' package
+						print "datetime.now:~" + datetime.now() + "~"
+						locker.start_date = datetime.now()
 						#send combo
 						#locker.send_text(number, message)
 						message = "You've checked out locker '" + locker.name + "' until " + date ". Combo: " + locker.combo
