@@ -21,4 +21,6 @@ delta = timedelta(days=7)
 
 dude_date = now + delta
 
+print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " due_date.strftime('%d, %b.. %Y')
+
 #print "now: " + now + " delta: " + delta + " dude_date: " + due_date
