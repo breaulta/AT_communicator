@@ -27,8 +27,16 @@ delta = timedelta(days=int(locker.checkout_time_length))
 
 due_date = now + delta
 locker.due_date = due_date
+main_lockers.remove_locker(locker)
+main_lockers.add_locker(locker)
+main_lockers.save_lockers_to_json_file()
+new_lockers = Lockers()
+new_lockers.json_file_to_lockers_obj()
+nlocker = new_lockers.get_locker_obj_given_locker_name("Lenron")
 
-test_date = locker.due_date + delta
+
+
+test_date = nlocker.due_date + delta
 print "computed test date: " + test_date.strftime('%d, %b, %Y')
 
 #print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
