@@ -26,9 +26,8 @@ print "test if this is string: ~" + now.strftime('%d, %b.. %Y') + "~"
 delta = timedelta(days=int(locker.checkout_time_length))
 
 due_date = now + delta
-locker.due_date = due_date
-
-test_date = locker.due_date + delta
+#test_date = locker.due_date + delta
+test_date = datetime(year=2009, month="Oct", day="3")
 print "computed test date: " + test_date.strftime('%d, %b, %Y')
 
 #print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
