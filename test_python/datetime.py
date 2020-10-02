@@ -19,7 +19,7 @@ print "test if this is string: ~" + now.strftime('%d, %b.. %Y') + "~"
 
 delta = timedelta(days=7)
 
-dude_date = now + delta
+due_date = now + delta
 
 print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
 
