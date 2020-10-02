@@ -17,8 +17,7 @@ from little_free_locker import Lockers
 #load stuff
 main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
-locker = Locker()
-locker = get_locker_obj_given_locker_name("Lenron")
+locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
 
 now = datetime.now()
