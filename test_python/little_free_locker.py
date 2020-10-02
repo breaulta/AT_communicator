@@ -174,6 +174,8 @@ class Locker:
 			raise Exception ("The locker needs to know how long to be active per user session.")
 		if 'start_date' in kwargs:
 			self.start_date = kwargs['start_date']
+		if 'due_date' in kwargs:
+			self.due_date = kwargs['due_date']
 		if 'total_renewals_possible' in kwargs:
 			self.total_renewals_possible = kwargs['total_renewals_possible']
 		else:
