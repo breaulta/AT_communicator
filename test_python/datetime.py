@@ -14,10 +14,16 @@ from module import SMS
 from little_free_locker import Locker
 from little_free_locker import Lockers
 
+#load stuff
+main_lockers = Lockers()
+main_lockers.load_lockers_from_user_input_txt_file("template.txt")
+locker = get_locker_obj_given_locker_name("Lenron")
+
+
 now = datetime.now()
 print "test if this is string: ~" + now.strftime('%d, %b.. %Y') + "~"
 
-delta = timedelta(days=7)
+delta = timedelta(days=locker.checkout_time_length)
 
 due_date = now + delta
 
