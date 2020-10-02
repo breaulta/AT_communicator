@@ -23,7 +23,7 @@ locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 now = datetime.now()
 print "test if this is string: ~" + now.strftime('%d, %b.. %Y') + "~"
 
-delta = timedelta(days=locker.checkout_time_length)
+delta = timedelta(days=int(locker.checkout_time_length))
 
 due_date = now + delta
 
