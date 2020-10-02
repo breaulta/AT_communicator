@@ -80,11 +80,8 @@ class Lockers:
 			self.add_locker(locker_obj)
 		#If it doesn't exist, create it anew.
 		else:
-			self.add_locker( Locker(**locker_in_data) )
+			self.add_locker( Locker(**locker_data_from_template_file) )
 
-#FOR NEXT TIME:
-#Also, we want to be overwriting any Locker attributes that are specified in the template file
-#(e.g. the user changes the combo)
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
 		#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
@@ -185,6 +182,22 @@ class Locker:
 		else:
 			self.renewals_used = "0"
 
+	#Stringify a datetime object for storage in a json file.
+	def serialize_date(datetime_object):
+		serialized_date = datetime_object.month + "/" + datetime_object.day + "/" + datetime_object.year
+		return serialized_date
+
+	#Return a datetime object from our json file.
+	def deserialize_date(serialized_date):
+		match_date = re.search('^(\d+)/(\d+)/(\d+)$', serialized_date)
+		if match_date:
+			month = int(match_date.groups()[0])
+			day = int(match_date.groups()[1])
+			year = int(match_date.groups()[2])
+			return datetime(year=year, month=month, day=day)
+		else:
+			raise Exception("Improperly stored date: ~" + serialized_date + "~")
+	
 
 #lockers with different passwords
 #locker basic object
