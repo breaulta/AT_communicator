@@ -4,6 +4,7 @@ import serial
 import re
 import json
 import os
+from datetime import datetime, timedelta
 
 json_database = "locker_database.json"
 
@@ -183,12 +184,12 @@ class Locker:
 			self.renewals_used = "0"
 
 	#Stringify a datetime object for storage in a json file.
-	def serialize_date(datetime_object):
-		serialized_date = datetime_object.month + "/" + datetime_object.day + "/" + datetime_object.year
+	def serialize_date(self, datetime_object):
+		serialized_date = str(datetime_object.month) + "/" + str(datetime_object.day) + "/" + str(datetime_object.year)
 		return serialized_date
 
 	#Return a datetime object from our json file.
-	def deserialize_date(serialized_date):
+	def deserialize_date(self, serialized_date):
 		match_date = re.search('^(\d+)/(\d+)/(\d+)$', serialized_date)
 		if match_date:
 			month = int(match_date.groups()[0])
