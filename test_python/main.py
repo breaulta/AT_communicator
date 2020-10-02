@@ -46,10 +46,15 @@ while(1):
 				if m:
 					#If we matched the 'name' case-insensitively at the beginning of locker parameters.
 					if m.groups()[0].lower() == locker.name.lower():
-						#print "group matched: ~" + m.groups()[0] + "~"
+						#Check if locker is currently checked out.
 						#set timer based on checkout time. probably use 'datetime' package
-						print "datetime.now:~" + datetime.now() + "~"
-						locker.start_date = datetime.now()
+						now = datetime.now()
+						#This looks like kwargs
+						delta = timedelta(days=locker.checkout_time_length)
+						due_date = now + delta
+						print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
+
+
 						#send combo
 						#locker.send_text(number, message)
 						message = "You've checked out locker '" + locker.name + "' until " + date ". Combo: " + locker.combo
