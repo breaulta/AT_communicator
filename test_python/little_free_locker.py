@@ -209,6 +209,13 @@ class Locker:
 
 	#def is_locker_checked_out(self):
 
+	def checkout_locker(self):
+		#check if checked out
+		#set checkout date
+		#calc duedate
+		#save duedate
+		
+
 #Notes for next time:
 #   Calculate due_date in locker method for is_locker_checked_out method
 #   Create is_locker_checked_out method

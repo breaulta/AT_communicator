@@ -23,6 +23,16 @@ main_lockers.remove_locker(locker)
 theduedate = locker.calculate_duedate()
 print " the due date: " + theduedate.strftime("%d, %b, %Y")
 
+locker.due_date = locker.serialize_date(theduedate)
+
+main_lockers.add_locker(locker)
+main_lockers.save_lockers_to_json_file()
+
+new_lockers = Lockers()
+new_lockers.json_file_to_lockers_obj()
+nlocker = new_lockers.get_locker_obj_given_locker_name("Lenron")
+new_date_obj = locker.deserialize_date(locker.due_date) 
+print " the due date: " + new_date_obj.strftime("%d, %b, %Y")
 
 #start_date = locker.start_date
 #start_datetime_obj = locker.deserialize_date(start_date)
