@@ -21,7 +21,7 @@ locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 main_lockers.remove_locker(locker)
 
 theduedate = locker.calculate_duedate()
-print " the due date: " + theduedate
+print " the due date: " + theduedate.strftime("%d, %b, %Y")
 
 
 #start_date = locker.start_date
