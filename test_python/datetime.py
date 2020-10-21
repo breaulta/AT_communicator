@@ -18,12 +18,13 @@ from little_free_locker import Lockers
 main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
+
+print "else: ", locker.due_date
+print "if: ", locker.due_date
+
+
+exit(0)
 main_lockers.remove_locker(locker)
-
-theduedate = locker.calculate_duedate()
-print " the due date: " + theduedate.strftime("%d, %b, %Y")
-
-locker.due_date = locker.serialize_date(theduedate)
 
 main_lockers.add_locker(locker)
 main_lockers.save_lockers_to_json_file()

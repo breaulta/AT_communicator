@@ -94,8 +94,8 @@ class Lockers:
 		for line in infile:
 			#Search for parameters of locker.
 			m = re.search('^(\w+)\:\"(.+)\"$', line)
-			#We found 'name' the beginning of locker parameters.
 			if m:
+				#Working on the 'name' parameter.
 				if m.groups()[0] == 'name':
 					locker_name = m.groups()[1]
 					#Check to make sure that two lockers with the same name don't appear in template file.
@@ -103,22 +103,10 @@ class Lockers:
 						raise Exception("Locker name " + locker_name + " appears more than once in the file!")
 					else:
 						locker_names_in_template_file.append(locker_name) 
-					#Test if this locker has already been added to database.
-					#if self.does_locker_name_exist(locker_name):
-					#	continue
 					#We're on a new locker in our template file.
 					#Write stored data from previous loop to lockers object. 
 					if locker_in_data:
 						self.populate_locker_attributes_from_template(locker_in_data)
-
-
-						#Test if this locker has already been added to json database.
-						#if self.does_locker_name_exist(locker_name):
-							#If we already have this Locker, update it with any new data from template file.
-						#	self._update_locker_from_template_file(locker_name, locker_in_data)
-						#Locker is a new locker, so add it to the Lockers object.
-						#else:
-						#	self.add_locker( Locker(**locker_in_data) )
 					#Start populating new locker hash(dict).
 					locker_in_data = {} #Reset for new locker.
 					locker_in_data.update({"name":locker_name})
@@ -172,8 +160,6 @@ class Locker:
 			raise Exception ("The locker needs to know how long to be active per user session.")
 		if 'start_date' in kwargs:
 			self.start_date = kwargs['start_date']
-		if 'due_date' in kwargs:
-			self.due_date = kwargs['due_date']
 		if 'total_renewals_possible' in kwargs:
 			self.total_renewals_possible = kwargs['total_renewals_possible']
 		else:
@@ -182,6 +168,19 @@ class Locker:
 			self.renewals_used = kwargs['renewals_used']
 		else:
 			self.renewals_used = "0"
+		#For holding calculated due date in serialized MM/DD/YYYY format.
+		self.due_date_internal = ""
+
+	#Property decorator takes our due_date attribute and makes it work like a method.
+	@property
+	#Returns MM/DD/YYYY (serialized) format date.
+	def due_date(self):
+		if self.due_date_internal:
+			return self.due_date_internal
+		#Calculate the due date if we don't know it yet.
+		else:
+			self.calculate_duedate()
+			return self.due_date_internal
 
 	#Stringify a datetime object for storage in a json file.
 	def serialize_date(self, datetime_object):
@@ -199,13 +198,13 @@ class Locker:
 		else:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
 
+	#Calculate due date based on difference between current time and checkout length.
 	def calculate_duedate(self):
-		#Calculate date/timing data.
 		now = datetime.now()
 		delta = timedelta(days=int(self.checkout_time_length))
 		due_date = now + delta
-		self.due_date = due_date
-		return due_date
+		#Serialize datetime object.
+		self.due_date_internal = self.serialize_date(due_date)
 
 	#def is_locker_checked_out(self):
 
