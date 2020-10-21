@@ -186,13 +186,15 @@ class Locker:
 		else:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
 
-	#Calculate due date based on difference between current time and checkout length.
 	def checkout_locker(self):
-		now = datetime.now()
-		delta = timedelta(days=int(self.checkout_time_length))
-		due_date = now + delta
-		#Serialize datetime object.
-		self.due_date = self.serialize_date(due_date)
+		if self.is_locker_checked_out:
+			raise Exception("Can't double check out locker!")
+		else:
+			now = datetime.now()
+			delta = timedelta(days=int(self.checkout_time_length))
+			due_date = now + delta
+			#Serialize datetime object.
+			self.due_date = self.serialize_date(due_date)
 
 	def is_locker_checked_out(self):
 		if hasattr(self, "due_date"):
