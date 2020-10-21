@@ -198,7 +198,23 @@ class Locker:
 			return datetime(year=year, month=month, day=day)
 		else:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
-	
+
+	def calculate_duedate(self):
+		#Calculate date/timing data.
+		now = datetime.now()
+		delta = timedelta(days=int(self.checkout_time_length))
+		due_date = now + delta
+		self.due_date = due_date
+		return due_date
+
+	#def is_locker_checked_out(self):
+
+#Notes for next time:
+#   Calculate due_date in locker method for is_locker_checked_out method
+#   Create is_locker_checked_out method
+#   Create checkout_locker method
+#   
+
 
 #lockers with different passwords
 #locker basic object

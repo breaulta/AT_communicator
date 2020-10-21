@@ -20,10 +20,14 @@ main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 main_lockers.remove_locker(locker)
 
-start_date = locker.start_date
-start_datetime_obj = locker.deserialize_date(start_date)
+theduedate = locker.calculate_duedate()
+print " the due date: " + theduedate
 
-print start_datetime_obj.strftime("%d, %b, %Y")
+
+#start_date = locker.start_date
+#start_datetime_obj = locker.deserialize_date(start_date)
+
+#print start_datetime_obj.strftime("%d, %b, %Y")
 
 #check_out_day = datetime.now()
 
