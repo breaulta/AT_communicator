@@ -195,7 +195,7 @@ class Locker:
 		self.due_date = self.serialize_date(due_date)
 
 	def is_locker_checked_out(self):
-		if hasattr(self, self.due_date):
+		if hasattr(self, "due_date"):
 			#Is checked out
 			return 1
 		else:
