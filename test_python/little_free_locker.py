@@ -168,20 +168,8 @@ class Locker:
 			self.renewals_used = kwargs['renewals_used']
 		else:
 			self.renewals_used = "0"
-		#For holding calculated due date in serialized MM/DD/YYYY format.
-		self.due_date_internal = ""
-
-	#Property decorator takes our due_date attribute and makes it work like a method.
-	@property
-	#Returns MM/DD/YYYY (serialized) format date.
-	def due_date(self):
-		if self.due_date_internal:
-			return self.due_date_internal
-		#Calculate the due date if we don't know it yet.
-		else:
-			self.calculate_duedate()
-			return self.due_date_internal
-
+		
+	
 	#Stringify a datetime object for storage in a json file.
 	def serialize_date(self, datetime_object):
 		serialized_date = str(datetime_object.month) + "/" + str(datetime_object.day) + "/" + str(datetime_object.year)
@@ -199,14 +187,20 @@ class Locker:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
 
 	#Calculate due date based on difference between current time and checkout length.
-	def calculate_duedate(self):
+	def checkout_locker(self):
 		now = datetime.now()
 		delta = timedelta(days=int(self.checkout_time_length))
 		due_date = now + delta
 		#Serialize datetime object.
-		self.due_date_internal = self.serialize_date(due_date)
+		self.due_date = self.serialize_date(due_date)
 
-	#def is_locker_checked_out(self):
+	def is_locker_checked_out(self):
+		if self.due_date:
+			#Is checked out
+			return 1
+		else:
+			return 0
+		
 
 	#def checkout_locker(self):
 		#check if checked out

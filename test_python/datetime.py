@@ -19,9 +19,13 @@ main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
-print "else: ", locker.due_date
-print "if: ", locker.due_date
+#print "else: ", locker.due_date
+#print "if: ", locker.due_date
 
+print "is locker checked out: " + str(locker.is_locker_checked_out())
+locker.checkout_locker()
+print "is locker checked out: " + str(locker.is_locker_checked_out())
+print "duedate:" + locker.due_date
 
 exit(0)
 main_lockers.remove_locker(locker)
