@@ -209,7 +209,7 @@ class Locker:
 
 	#def is_locker_checked_out(self):
 
-	def checkout_locker(self):
+	#def checkout_locker(self):
 		#check if checked out
 		#set checkout date
 		#calc duedate
