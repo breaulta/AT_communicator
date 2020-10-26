@@ -45,10 +45,11 @@ class Lockers:
 		json.dump(locker_to_json, outfile)
 		outfile.close()
 
+	#Create a Lockers object from our json database file.
 	def json_file_to_lockers_obj(self):
-		#It's ok if it hasn't been created yet, test for existence, and exit here.
+		#Check if json database has been created before attempting to open.
 		if not os.path.isfile(json_database):
-			return	
+			return
 		json_file = open(json_database, 'r')
 		read_data = json.load(json_file)
 		json_file.close()
@@ -90,9 +91,9 @@ class Lockers:
 		#Hash to hold data gleaned from file for each locker.
 		locker_in_data = {}
 		locker_names_in_template_file = []
-		infile = open(locker_template_filename, 'r')
-		for line in infile:
-			#Search for parameters of locker.
+		template_file = open(locker_template_filename, 'r')
+		for line in template_file:
+			#Search for parameters of locker from template file.
 			m = re.search('^(\w+)\:\"(.+)\"$', line)
 			if m:
 				#Working on the 'name' parameter.
@@ -129,7 +130,7 @@ class Lockers:
 		#Adding the last locker in the template file to our lockers object.
 		if locker_in_data:
 			self.populate_locker_attributes_from_template(locker_in_data)
-		infile.close()
+		template_file.close()
 		#Write any changes to Lockers object to json database.
 		self.save_lockers_to_json_file()
 
@@ -160,6 +161,10 @@ class Locker:
 			raise Exception ("The locker needs to know how long to be active per user session.")
 		if 'start_date' in kwargs:
 			self.start_date = kwargs['start_date']
+		if 'due_date' in kwargs:
+			self.due_date = kwargs['due_date']
+		if 'tenant_number' in kwargs:
+			self.tenant_number = kwargs['tenant_number']
 		if 'total_renewals_possible' in kwargs:
 			self.total_renewals_possible = kwargs['total_renewals_possible']
 		else:
@@ -187,7 +192,7 @@ class Locker:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
 
 	def checkout_locker(self, tenant_number):
-		if self.is_locker_checked_out:
+		if self.is_locker_checked_out():
 			raise Exception("Can't double check out locker!")
 		else:
 			now = datetime.now()
