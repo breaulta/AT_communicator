@@ -186,7 +186,7 @@ class Locker:
 		else:
 			raise Exception("Improperly stored date: ~" + serialized_date + "~")
 
-	def checkout_locker(self):
+	def checkout_locker(self, tenant_number):
 		if self.is_locker_checked_out:
 			raise Exception("Can't double check out locker!")
 		else:
@@ -195,6 +195,8 @@ class Locker:
 			due_date = now + delta
 			#Serialize datetime object.
 			self.due_date = self.serialize_date(due_date)
+			#record tenant number
+			self.tenant_number = tenant_number
 
 	def is_locker_checked_out(self):
 		if hasattr(self, "due_date"):

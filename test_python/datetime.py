@@ -19,19 +19,19 @@ main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
+phone_number = '5039895540'
 
 print "is locker checked out: " + str(locker.is_locker_checked_out())
-locker.checkout_locker()
+locker.checkout_locker(phone_number)
 print "is locker checked out: " + str(locker.is_locker_checked_out())
 print "duedate:" + locker.due_date
-locker.checkout_locker()
+#locker.checkout_locker()
 
-exit(0)
-main_lockers.remove_locker(locker)
 
 main_lockers.add_locker(locker)
 main_lockers.save_lockers_to_json_file()
 
+exit(0)
 new_lockers = Lockers()
 new_lockers.json_file_to_lockers_obj()
 nlocker = new_lockers.get_locker_obj_given_locker_name("Lenron")
