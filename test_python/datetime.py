@@ -21,6 +21,7 @@ locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
 phone_number = '5039895540'
 
+print "duedate:" + locker.due_date
 print "is locker checked out: " + str(locker.is_locker_checked_out())
 locker.checkout_locker(phone_number)
 print "is locker checked out: " + str(locker.is_locker_checked_out())
