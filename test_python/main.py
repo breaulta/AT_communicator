@@ -58,20 +58,26 @@ while(1):
 					#Match case-insensitively the name of the locker to the text message.
 					if m.groups()[0].lower() == locker.name.lower():
 #Notes for next time:
-#	Calculate due_date in locker method for is_locker_checked_out method
-#	Create is_locker_checked_out method
-#	Create checkout_locker method
-#	
-						
+#Check-out locker
+#Send text to checker-outer that locker is checked out and give them combo, and let them know the due date.
+#Send text to locker owner, notifiying them of the same.
 
+#For additional help, add yes/no to template file for help with locker:
+#Have option to text owner number (please contact 503-xxx-xxxx for any additional help)
+
+#For renewals:
+#3 days before: notify them of due date and that you have x renewals, text RENEW to renew (if they have multiple lockers checked out, renew them both).
+#If 0 renewals, let them know that stuff must be removed from locker by the specified due date.
+
+#Due date reminder:
+#Even if no renewals possible, remind them 48, and 24 hours before that locker needs to be cleared.
+#Then, on due date, let them know that any items remaining in the locker may be forfeited if not removed today.
 
 						#Check if locker is currently checked out.
 
-						#locker.due_date = due_date
-						print "you checked out on " + now.strftime('%d, %b.. %Y') + ". your locker will expire on " + due_date.strftime('%d, %b.. %Y')
 
 						#send combo
-						message = "You've checked out locker '" + locker.name + "' until " + due_date.strftime('%d, %b.. %Y') + ". Combo: " + locker.combo
+						message = "You've checked out locker '" + locker.name + "' until " + locker.due_date + ". The combo to the locker is: " + locker.combo
 						#tx.send_text(number, message)
 						print "sending text. number:~" + sms.phone + "~ message:~" + message + "~"
 						#record/notify that this locker has been checked out.

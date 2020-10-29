@@ -15,9 +15,13 @@ class Lockers:
 		self.lockers = []
 
 	def add_locker(self, locker):
+		if self.does_locker_name_exist(locker.name):
+			raise Exception("Can't double add locker " + locker.name)
 		self.lockers.append(locker)
 
 	def remove_locker(self, locker):
+		if not self.does_locker_name_exist(locker.name):
+			raise Exception("We can't remove locker " + locker.name + " because it's not in our Lockers object")
 		self.lockers.remove(locker)
 
 	def print_lockers(self):
@@ -212,36 +216,28 @@ class Locker:
 	
 	def freeup_locker(self):
 		if not self.is_locker_checked_out():
-			raise Exception("Locker is already free!")
+			raise Exception("Locker " + self.name + " is already free!")
 		else:
 			delattr(self, "due_date")
 			delattr(self, "tenant_number")
 			delattr(self, "start_date")
 			self.renewals_used = '0'
 		
-		
-		
+	def renew_locker(self):
+		#Ensure that locker is checked out.
+		if not self.is_locker_checked_out():
+			raise Exception("Can't renew locker " + self.name + ", it's not checked out!")
 
+		#Ensure that we have renewals remaining
+		if int (self.renewals_used) >= int(self.total_renewals_possible):
+			raise Exception("Can't renew locker " + self.name + ", all renewals have already been used!")
 
-	#def checkout_locker(self):
-		#check if checked out
-		#set checkout date
-		#calc duedate
-		#save duedate
-		
-
-#Notes for next time:
-#   Calculate due_date in locker method for is_locker_checked_out method
-#   Create is_locker_checked_out method
-#   Create checkout_locker method
-#   
-
-
-#lockers with different passwords
-#locker basic object
-#each locker has combo, name, location, host contact number, current borrower phone number, 
-#locker checkout time, options to renew, number of renewals possible.
-#Maybe locker block object that holds multiple lockers on the same sim/modem.
-#update owner with texts
-#combos for lockers saved in text file maybe
+		#Calculate new due date
+		now = datetime.now()
+		delta = timedelta(days=int(self.checkout_time_length))
+		due_date = now + delta
+		#Serialize datetime object.
+		self.due_date = self.serialize_date(due_date)
+		#Increment renewals used up.
+		self.renewals_used = str( int(self.renewals_used) + 1 )
 
