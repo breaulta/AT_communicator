@@ -153,8 +153,6 @@ class Locker:
 			self.host_number = kwargs['host_number']
 		else:
 			raise Exception ("The locker needs a contact number for the host.")
-		if 'current_borrower_number' in kwargs:
-			self.current_borrower_number = kwargs['current_borrower_number']
 		if 'checkout_time_length' in kwargs:
 			self.checkout_time_length = kwargs['checkout_time_length']
 		else:
@@ -200,8 +198,10 @@ class Locker:
 			due_date = now + delta
 			#Serialize datetime object.
 			self.due_date = self.serialize_date(due_date)
+			self.start_date = self.serialize_date(now)
 			#record tenant number
 			self.tenant_number = tenant_number
+			self.renewals_used = '0'
 
 	def is_locker_checked_out(self):
 		if hasattr(self, "due_date"):
@@ -209,7 +209,19 @@ class Locker:
 			return 1
 		else:
 			return 0
+	
+	def freeup_locker(self):
+		if not self.is_locker_checked_out():
+            raise Exception("Locker is already free!")
+        else:
+			delattr(self, "due_date")
+			delattr(self, "tenant_number")
+			delattr(self, "start_date")
+			self.renewals_used = '0'
 		
+		
+		
+
 
 	#def checkout_locker(self):
 		#check if checked out

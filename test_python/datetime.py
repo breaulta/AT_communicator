@@ -21,7 +21,7 @@ locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
 print "tenant number is: " + locker.tenant_number
 
-main_lockers.remove_locker(locker)
+#main_lockers.remove_locker(locker)
 
 phone_number = '5039895540'
 
@@ -37,12 +37,20 @@ print "tenant number:" + locker.tenant_number
 main_lockers.add_locker(locker)
 main_lockers.save_lockers_to_json_file()
 
-exit(0)
+
 new_lockers = Lockers()
 new_lockers.json_file_to_lockers_obj()
+
 nlocker = new_lockers.get_locker_obj_given_locker_name("Lenron")
-new_date_obj = locker.deserialize_date(locker.due_date) 
-print " the due date: " + new_date_obj.strftime("%d, %b, %Y")
+
+nlocker.freeup_locker()
+
+print "is nlocker checked out: " + str(nlocker.is_locker_checked_out())
+nlocker.checkout_locker(phone_number)
+print "is nlocker checked out: " + str(nlocker.is_locker_checked_out())
+print "duedate:" + nlocker.due_date
+print "tenant number:" + nlocker.tenant_number
+
 
 #start_date = locker.start_date
 #start_datetime_obj = locker.deserialize_date(start_date)
