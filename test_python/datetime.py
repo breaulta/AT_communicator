@@ -19,7 +19,7 @@ main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 locker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 
-print "tenant number is: " + locker.tenant_number
+#print "tenant number is: " + locker.tenant_number
 
 #main_lockers.remove_locker(locker)
 
@@ -46,10 +46,10 @@ nlocker = new_lockers.get_locker_obj_given_locker_name("Lenron")
 nlocker.freeup_locker()
 
 print "is nlocker checked out: " + str(nlocker.is_locker_checked_out())
-nlocker.checkout_locker(phone_number)
-print "is nlocker checked out: " + str(nlocker.is_locker_checked_out())
-print "duedate:" + nlocker.due_date
+#nlocker.checkout_locker(phone_number)
+#print "is nlocker checked out: " + str(nlocker.is_locker_checked_out())
 print "tenant number:" + nlocker.tenant_number
+print "duedate:" + nlocker.due_date
 
 
 #start_date = locker.start_date
