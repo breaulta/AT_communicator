@@ -35,7 +35,7 @@ print "tenant number:" + locker.tenant_number
 
 
 main_lockers.add_locker(locker)
-#main_lockers.save_lockers_to_json_file()
+main_lockers.save_lockers_to_json_file()
 
 exit(0)
 new_lockers = Lockers()
