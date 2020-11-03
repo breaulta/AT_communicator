@@ -21,9 +21,9 @@ lenlocker = main_lockers.get_locker_obj_given_locker_name("Lenron")
 #main_lockers.remove_locker(locker)
 
 phone_number = '5039895540'
-main_lockers.remove_locker(lenlocker)
-lenlocker.checkout_locker(phone_number)
-main_lockers.add_locker(lenlocker)
+#main_lockers.remove_locker(lenlocker)
+#lenlocker.checkout_locker(phone_number)
+#main_lockers.add_locker(lenlocker)
 
 if main_lockers.user_has_locker_checkedout(phone_number):
 	print "locker is checkedout!"
