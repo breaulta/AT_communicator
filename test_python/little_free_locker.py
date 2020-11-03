@@ -138,6 +138,14 @@ class Lockers:
 		#Write any changes to Lockers object to json database.
 		self.save_lockers_to_json_file()
 
+	def user_has_locker_checkedout (self, number):
+		for locker in self.lockers:
+			if locker.tenant_number:
+				if locker.tenant_number == number:
+					return 1
+		return 0
+				
+
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, **kwargs):
