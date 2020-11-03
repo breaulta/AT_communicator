@@ -140,7 +140,7 @@ class Lockers:
 
 	def user_has_locker_checkedout (self, number):
 		for locker in self.lockers:
-			if locker.tenant_number:
+			if hasattr(locker, "tenant_number"):
 				if locker.tenant_number == number:
 					return 1
 		return 0
