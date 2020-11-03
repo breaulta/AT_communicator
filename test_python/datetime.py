@@ -18,7 +18,7 @@ from little_free_locker import Lockers
 main_lockers = Lockers()
 main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 lenlocker = main_lockers.get_locker_obj_given_locker_name("Lenron")
-#main_lockers.remove_locker(locker)
+main_lockers.remove_locker(lenlocker)
 
 phone_number = '5039895540'
 
