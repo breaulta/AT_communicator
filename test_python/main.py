@@ -55,8 +55,19 @@ while(1):
 				#We are doing the best we can to extract the locker name from the incomming sms message.
 				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
+					user_text_input = m.groups()[0]
+					#Does the user input match the name of a locker to be checked out.
 					#Match case-insensitively the name of the locker to the text message.
-					if m.groups()[0].lower() == locker.name.lower():
+					if user_text_input.lower() == locker.name.lower():
+						#Check if the user has any other lockers checked out in this cluster.
+						if main_lockers.user_has_lockers_checkedout(sms.phone):
+							#block them from chekcing out
+							message = "This locker cluster does not allow multiple lockers to be checked out by the same number."
+							tx.send_text(sms.phone, message)
+							#tx.send_text_to_host(host_number, sms.phone, message)
+						else:
+							#check out is ok
+							
 #Notes for next time:
 #Check-out locker
 #Send text to checker-outer that locker is checked out and give them combo, and let them know the due date.
@@ -73,8 +84,12 @@ while(1):
 #Even if no renewals possible, remind them 48, and 24 hours before that locker needs to be cleared.
 #Then, on due date, let them know that any items remaining in the locker may be forfeited if not removed today.
 
-						#Check if locker is currently checked out.
+#Check to see if any lockers have been checked out, if they have.
 
+#Text any discrepancies/errors to the user.
+
+						#Check if locker is currently checked out.
+						
 
 						#send combo
 						message = "You've checked out locker '" + locker.name + "' until " + locker.due_date + ". The combo to the locker is: " + locker.combo

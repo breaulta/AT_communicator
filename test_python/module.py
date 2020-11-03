@@ -166,6 +166,10 @@ class Transmitter:
 		response1 = self.send_AT('AT+CMGS="' + number + '"\r\n') 
 		response2 = self.send_AT( message + chr(26))
 
+	def send_text_to_host(self, host_number, tenant_number, message):
+		host_message = "Text sent to ~" + tenant_number +"~ :\n" + message 
+		self.send_text(host_message)
+
 	#Returns array of SMS objects, returning all texts on SIM card.
 	def get_all_texts(self):
 		sms_array = []
