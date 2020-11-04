@@ -1,3 +1,4 @@
+#Reboot for changes to take effect.
 #The name the user texts to the locker phone number to get the combo.
 name:"Lenron"
 #The combo to be given to the user.
@@ -5,7 +6,7 @@ combo:"10-11-34"
 #The address where the locker can be found.
 address:"4321 testing rd bend or, 97702"
 #Your number, for locker updates.
-host_number:"503-989-5540"
+host_number:"503-380-3136"
 #The number of days the locker can be checked out.
 checkout_time_length:"7"
 #The number of renewals on locker checkouts.

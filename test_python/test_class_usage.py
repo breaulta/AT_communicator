@@ -20,8 +20,8 @@ from module import SMS
 sms_database_filename = "sms_database.json"
 
 tx = Transmitter(port = '/dev/ttyUSB2')
-#tx.send_text('5033803136', '4th from python')
-
+tx.send_text('5033803136', 'at test')
+exit(0)
 #Get new sms messages from SIM card in array.
 new_sms_array = tx.get_all_texts()
 

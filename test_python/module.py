@@ -127,24 +127,43 @@ class Transmitter:
 
     #Send AT command to modem.
 	def send_AT(self, AT):
+		print "top of send_at"
+		#Open up our serial connection to the SIM
 		self.ser.isOpen()   
+		#First send a simple 'AT' command, and confirm it returns 'OK'.
+		#This will indicate to us that our SIM is working and ready for more AT commands.
+		#while(1):
+		#	print "we're in a loop"
+		#	ok_response = ''
+		#	self.ser.write("AT\r\n")
+		#	while self.ser.inWaiting() > 0:
+		#		ok_response += self.ser.read(1)
+		#	if ok_response == 'AT\r\r\nOK\r\n':
+		#		break
+		#	time.sleep(10)
+		#chr(26)
+		print "we're out of the loop"
 		self.ser.write(AT + "\r\n")
 		time.sleep(1)
-		ser_response = '';
+		ser_response = ''
 		while self.ser.inWaiting() > 0:
 			ser_response += self.ser.read(1)
+		print "bottom of send_at"
 		return ser_response
 
 	#Check if SIM card configured for SMS text mode.
 	def check_sms_mode(self):
 		sms_mode = self.send_AT('AT+CMGF?')
 		regex_mode_result = re.search("\+CMGF:\s+([01])", sms_mode)
-		if regex_mode_result.group(1) == '1':
-			return "text_mode_on"
-		elif regex_mode_result.group(1) == '0':
-			return "text_mode_off"
-		else:
-			return "text_mode_error"
+		if regex_mode_result:
+			#If CMGF = 1, our sim is in text mode
+			if regex_mode_result.group(1) == '1':
+				return "text_mode_on"
+			#If CMGF = 0, our sim is in pdu mode
+			elif regex_mode_result.group(1) == '0':
+				return "text_mode_off"
+		#We ran into this bug once before, hopefully we can narrow it down with this exception:
+		raise Exception("Error: our CMGF query didn't return 1 or 0, here's what we got back: ~" + sms_mode + "~")
 
     #Set SMS for text mode. sms_mode of 1 = texting (this is what we want), 0 = Programmable data unit PDU.
 	def set_sms_mode(self, sms_mode):
@@ -168,7 +187,7 @@ class Transmitter:
 
 	def send_text_to_host(self, host_number, tenant_number, message):
 		host_message = "Text sent to ~" + tenant_number +"~ :\n" + message 
-		self.send_text(host_message)
+		self.send_text(host_number, host_message)
 
 	#Returns array of SMS objects, returning all texts on SIM card.
 	def get_all_texts(self):

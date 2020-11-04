@@ -22,6 +22,8 @@ main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 sms_database_filename = "sms_database.json"
 tx = Transmitter(port = '/dev/ttyUSB2')
 
+print "we need to run in root"
+
 #infinite loop
 while(1):
 
@@ -46,13 +48,12 @@ while(1):
 		#~~~~~~~~~~~~~~~~~~
 
 		#Little free locker response to new texts
-		#Incoming sms should be only the name of the locker they're trying to checkout.
 		for sms in new_sms_array:
 			print "received sms message: ~" + sms.message + "~" #debugging
 			#Cycle through lockers to see if the incomming sms matches a locker name.
 			for locker in main_lockers.lockers:
 				#In order for the (\b) to work we needed the r.
-				#We are doing the best we can to extract the locker name from the incomming sms message.
+				#Extract the text content from the incomming sms message.
 				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
 					user_text_input = m.groups()[0]
@@ -60,13 +61,28 @@ while(1):
 					#Match case-insensitively the name of the locker to the text message.
 					if user_text_input.lower() == locker.name.lower():
 						#Check if the user has any other lockers checked out in this cluster.
-						if main_lockers.user_has_lockers_checkedout(sms.phone):
-							#block them from chekcing out
-							message = "This locker cluster does not allow multiple lockers to be checked out by the same number."
+						if main_lockers.user_has_locker_checkedout(sms.phone):
+							#block them from checking out
+							message = "You already have a locker checked out. This locker cluster does not allow multiple lockers to be checked out by the same number."
 							tx.send_text(sms.phone, message)
-							#tx.send_text_to_host(host_number, sms.phone, message)
+							tx.send_text_to_host(locker.host_number, sms.phone, message)
 						else:
-							#check out is ok
+							print "you're good to check out"
+				else:
+					print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
+	time.sleep(15)
+
+
+#check for incoming sms messages
+
+#act on that sms message smartly
+
+#save the sms
+
+#perform some logic
+
+
+#check out is ok
 							
 #Notes for next time:
 #Check-out locker
@@ -88,25 +104,12 @@ while(1):
 
 #Text any discrepancies/errors to the user.
 
-						#Check if locker is currently checked out.
-						
-
-						#send combo
-						message = "You've checked out locker '" + locker.name + "' until " + locker.due_date + ". The combo to the locker is: " + locker.combo
-						#tx.send_text(number, message)
-						print "sending text. number:~" + sms.phone + "~ message:~" + message + "~"
-						#record/notify that this locker has been checked out.
-					else:
-						print "group didn't match for some reason"
-				else:
-					print "text received but not caught by regex :("
-	time.sleep(15)
+#Check if locker is currently checked out.
 
 
-#check for incoming sms messages
+#send combo
+#message = "You've checked out locker '" + locker.name + "' until " + locker.due_date + ". The combo to the locker is: " + locker.combo
+#tx.send_text(number, message)
+#print "sending text. number:~" + sms.phone + "~ message:~" + message + "~"
+#record/notify that this locker has been checked out.
 
-#act on that sms message smartly
-
-#save the sms
-
-#perform some logic
