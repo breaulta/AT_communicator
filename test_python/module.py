@@ -8,9 +8,9 @@ import os
 class Transmitter:
 	#Initalize Transmitter object attributes.
 	def __init__(self, **kwargs):
-		#return None
-		#print "I don't print"
-
+		#Ensure that we're running as root.
+		if not os.geteuid()==0:
+			raise Exception("Must run as root!")
 		#If a specific port is specified, connect to that port.
 		defined_port = ''
 		if 'port' in kwargs:
@@ -19,6 +19,13 @@ class Transmitter:
 			defined_port = '/dev/ttyUSB2'
 		self.usb_path = defined_port
 		self.__configure_ser_connection_to_usb(self.usb_path)
+		#If a specific QMICLI device path is specified, use that.
+		defined_qmi_path = ''
+		if 'qmi_path' in kwargs:
+			defined_qmi_path = kwargs['qmi_path']
+		else:
+			defined_qmi_path = '/dev/cdc-wdm0'
+		self.ensure_sim_card_connected_to_network(defined_qmi_path)
 
 	#Configure serial connection settings.
 	def __configure_ser_connection_to_usb(self, usb_port):
@@ -30,25 +37,25 @@ class Transmitter:
 			bytesize=serial.EIGHTBITS
 		)
 		time.sleep(5)
+		#Ensure that AT command 'AT' returns echoed 'AT' (multiple tries if necessary).
 		for connection_attempt in range(15):
 			check_AT = self.send_AT('AT')
 			#Ensure that AT message is returned.
 			if check_AT:
 				if check_AT.startswith('AT'):
-					continue
+					return
 				else:
-					raise Exception("This is an unexpected case, we should have gotten 'AT' back, but we got ~" + check_AT + "~ back")
+					time.sleep(5)
 			else:
 				time.sleep(15)
+		raise Exception("Hey, we did not expect this AT test to fail!")
+		
 
 
 	#Check that the SIM card via the Qmicli interface is connected to the mobile network.
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
 	#Must run as root
 	def ensure_sim_card_connected_to_network(self, sim_path):
-		#Ensure that we're running as root.
-		if not os.geteuid()==0:
-			raise Exception("Must run as root!")
 		#Check if our SIM card is connected to the network or not.
 		sim_mode = self.__get_qmicli_mode(sim_path)
 		#If not online, try to turn it on.
@@ -92,7 +99,6 @@ class Transmitter:
 			return 1
 		#Looks like we're online! Return true.
 		else:
-			#print "Our SIM card is already online."
 			return 1
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
@@ -127,7 +133,6 @@ class Transmitter:
 
     #Send AT command to modem.
 	def send_AT(self, AT):
-		print "top of send_at"
 		#Open up our serial connection to the SIM
 		self.ser.isOpen()   
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
@@ -142,13 +147,11 @@ class Transmitter:
 		#		break
 		#	time.sleep(10)
 		#chr(26)
-		print "we're out of the loop"
 		self.ser.write(AT + "\r\n")
 		time.sleep(1)
 		ser_response = ''
 		while self.ser.inWaiting() > 0:
 			ser_response += self.ser.read(1)
-		print "bottom of send_at"
 		return ser_response
 
 	#Check if SIM card configured for SMS text mode.

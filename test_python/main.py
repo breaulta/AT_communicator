@@ -20,15 +20,12 @@ main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 #maybe load sms messages??? can't think of a reason why right now....
 
 sms_database_filename = "sms_database.json"
-tx = Transmitter(port = '/dev/ttyUSB2')
+tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
 print "we need to run in root"
 
 #infinite loop
 while(1):
-
-	#Ensure sim/hat is set up and able to send/receive texts.
-	tx.ensure_sim_card_connected_to_network("/dev/cdc-wdm0")
 	#Read in any potential new texts (incoming sms).
 	print "We're running get all texts now!"
 	#Query sim/hat for any new texts it has received.
