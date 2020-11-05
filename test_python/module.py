@@ -137,16 +137,17 @@ class Transmitter:
 		self.ser.isOpen()   
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
 		#This will indicate to us that our SIM is working and ready for more AT commands.
-		#while(1):
-		#	print "we're in a loop"
-		#	ok_response = ''
-		#	self.ser.write("AT\r\n")
-		#	while self.ser.inWaiting() > 0:
-		#		ok_response += self.ser.read(1)
-		#	if ok_response == 'AT\r\r\nOK\r\n':
-		#		break
-		#	time.sleep(10)
-		#chr(26)
+		for filter_AT_response in range(15):
+			print "inside infinite while"
+			ok_response = ''
+			self.ser.write("AT\r\n")
+			while self.ser.inWaiting() > 0:
+				ok_response += self.ser.read(1)
+			if ok_response.startswith('AT'):
+				break
+			time.sleep(5)
+			if filter_AT_response > 14:
+				raise Exception('Could not verify AT functionality by an AT echo')
 		self.ser.write(AT + "\r\n")
 		time.sleep(1)
 		ser_response = ''
