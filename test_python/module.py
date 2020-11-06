@@ -138,7 +138,7 @@ class Transmitter:
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
 		#This will indicate to us that our SIM is working and ready for more AT commands.
 		for filter_AT_response in range(15):
-			print "inside infinite while. range: " + filter_AT_response
+			print "inside infinite while. range: " + str(filter_AT_response)
 			ok_response = ''
 			self.ser.write("AT\r\n")
 			while self.ser.inWaiting() > 0:
