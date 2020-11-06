@@ -138,7 +138,7 @@ class Transmitter:
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
 		#This will indicate to us that our SIM is working and ready for more AT commands.
 		for filter_AT_response in range(15):
-			print "inside infinite while"
+			print "inside infinite while. range: " + filter_AT_response
 			ok_response = ''
 			self.ser.write("AT\r\n")
 			while self.ser.inWaiting() > 0:
@@ -146,7 +146,7 @@ class Transmitter:
 			if ok_response.startswith('AT'):
 				break
 			time.sleep(5)
-			if filter_AT_response > 14:
+			if filter_AT_response >= 14:
 				raise Exception('Could not verify AT functionality by an AT echo')
 		self.ser.write(AT + "\r\n")
 		time.sleep(1)
