@@ -132,19 +132,30 @@ class Transmitter:
 			return 0
 
     #Send AT command to modem.
-	def send_AT(self, AT):
+	def send_AT(self, AT, waiting_for_chr_26 = 0):
 		#Open up our serial connection to the SIM
 		self.ser.isOpen()   
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
 		#This will indicate to us that our SIM is working and ready for more AT commands.
 		for filter_AT_response in range(15):
-			print "inside infinite while. range: " + str(filter_AT_response)
+			#If we're waiting for chr(26) inside a text message - an echo test won't work so break away!
+			if waiting_for_chr_26:
+				break
 			ok_response = ''
 			self.ser.write("AT\r\n")
 			while self.ser.inWaiting() > 0:
 				ok_response += self.ser.read(1)
+			#If our AT is ready, then break away.
 			if ok_response.startswith('AT'):
 				break
+			#If we've hit a weird error, and we're inside a text message, notify and fix it.
+			elif ok_response.endswith('> AT'):
+				print "We hit an unknown error, waiting for chr(26) to end AT text message!"
+				self.ser.write( "Sorry there was an error" + chr(26) )
+				while self.ser.inWaiting() > 0:
+					ok_response += self.ser.read(1)
+				print "Hopefully we fixed it, here is the AT response: ~" + ok_response + "~"
+				continue
 			time.sleep(5)
 			if filter_AT_response >= 14:
 				raise Exception('Could not verify AT functionality by an AT echo')
@@ -187,7 +198,7 @@ class Transmitter:
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
 		#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
 		response1 = self.send_AT('AT+CMGS="' + number + '"\r\n') 
-		response2 = self.send_AT( message + chr(26))
+		response2 = self.send_AT( message + chr(26), 1)
 
 	def send_text_to_host(self, host_number, tenant_number, message):
 		host_message = "Text sent to ~" + tenant_number +"~ :\n" + message 
