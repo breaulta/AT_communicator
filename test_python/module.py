@@ -48,9 +48,10 @@ class Transmitter:
 					time.sleep(5)
 			else:
 				time.sleep(15)
-		raise Exception("Hey, we did not expect this AT test to fail!")
-		
-
+		print "Function: __configure_ser_connection_to_usb\n Resetting sim hat because we hit the 'AT not responding' error."
+		#We experienced a strange error where the AT (sim card) hat won't echo AT calls.  The only way we
+		#know of to fix it is to perform a QMICLI reset of the sim card (hat).
+		self._reset_sim_hat(self.usb_path)
 
 	#Check that the SIM card via the Qmicli interface is connected to the mobile network.
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
@@ -100,6 +101,12 @@ class Transmitter:
 		#Looks like we're online! Return true.
 		else:
 			return 1
+
+	def _reset_sim_hat(self, sim_path):
+		#set offline
+		self.__set_qmicli_mode('offline', sim_path)
+		#then call ensure_sim_connected
+		self.ensure_sim_card_connected_to_network(sim_path)
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
 	def __check_sim_path(self, sim_path):
@@ -158,9 +165,14 @@ class Transmitter:
 				continue
 			time.sleep(5)
 			if filter_AT_response >= 14:
-				raise Exception('Could not verify AT functionality by an AT echo')
+				#raise Exception('Could not verify AT functionality by an AT echo')
+				print "Function: send_AT\n Resetting sim hat because we hit the 'AT not responding' error."
+				#We experienced a strange error where the AT (sim card) hat won't echo AT calls.  The only way we
+				#know of to fix it is to perform a QMICLI reset of the sim card (hat).
+				self._reset_sim_hat(self.usb_path)
+
 		self.ser.write(AT + "\r\n")
-		time.sleep(1)
+		time.sleep(5)
 		ser_response = ''
 		while self.ser.inWaiting() > 0:
 			ser_response += self.ser.read(1)
