@@ -6,7 +6,7 @@ combo:"10-11-34"
 #The address where the locker can be found.
 address:"4321 testing rd bend or, 97702"
 #Your number, for locker updates.
-host_number:"503-380-3136"
+host_number:"5033803136"
 #The number of days the locker can be checked out.
 checkout_time_length:"7"
 #The number of renewals on locker checkouts.

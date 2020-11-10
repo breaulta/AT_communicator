@@ -9,6 +9,10 @@ import os
 import sys
 sys.dont_write_bytecode = True
 
+#Ensure that we're running as root.
+if not os.geteuid()==0:
+	raise Exception("Must run as root!")
+
 from module import Transmitter
 from module import SMS
 from little_free_locker import Locker
@@ -22,7 +26,9 @@ main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 sms_database_filename = "sms_database.json"
 tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
-print "we need to run in root"
+#FIX FOR PROBLEM: TURN OFFLINE, RESET, TURN BACK ONLINE QMI DEVICE
+#FIRST LINE OF DEFENSE RATHER THAN RAISING EXCEPTION
+#SPACE OUT AT CALLS TO ENSURE THERE'S NEEDED SPACE
 
 #infinite loop
 while(1):
