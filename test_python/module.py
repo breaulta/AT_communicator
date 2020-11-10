@@ -172,7 +172,7 @@ class Transmitter:
 				self._reset_sim_hat(self.usb_path)
 
 		self.ser.write(AT + "\r\n")
-		time.sleep(5)
+		time.sleep(1)
 		ser_response = ''
 		while self.ser.inWaiting() > 0:
 			ser_response += self.ser.read(1)

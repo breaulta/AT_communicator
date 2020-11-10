@@ -26,9 +26,8 @@ main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 sms_database_filename = "sms_database.json"
 tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
-#FIX FOR PROBLEM: TURN OFFLINE, RESET, TURN BACK ONLINE QMI DEVICE
-#FIRST LINE OF DEFENSE RATHER THAN RAISING EXCEPTION
-#SPACE OUT AT CALLS TO ENSURE THERE'S NEEDED SPACE
+#CODE TO WRITE: locker due date reminder text
+
 
 #infinite loop
 while(1):
@@ -59,22 +58,35 @@ while(1):
 				#Extract the text content from the incomming sms message.
 				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
+					print "we're trying to check out the locker 3"
 					user_text_input = m.groups()[0]
 					#Does the user input match the name of a locker to be checked out.
 					#Match case-insensitively the name of the locker to the text message.
 					if user_text_input.lower() == locker.name.lower():
+						print "we're trying to check out the locker 2"
 						#Check if the user has any other lockers checked out in this cluster.
 						if main_lockers.user_has_locker_checkedout(sms.phone):
 							#block them from checking out
 							message = "You already have a locker checked out. This locker cluster does not allow multiple lockers to be checked out by the same number."
 							tx.send_text(sms.phone, message)
 							tx.send_text_to_host(locker.host_number, sms.phone, message)
+						#User is good to check this locker out, so checkout the locker.
 						else:
-							print "you're good to check out"
+							print "we're trying to check out the locker"
+							main_lockers.remove_locker(locker)
+							locker.checkout_locker(sms.phone)
+							main_lockers.add_locker(locker)
+							main_lockers.save_lockers_to_json_file()
+							message = "Congratulations! You have successfully checked out " + locker.name + ". To open this locker, use the combination: " + locker.combo + ". This locker must be emptied by " + locker.due_date + "."
+							#If renewals are possible, let user know.
+							if locker.total_renewals_possible > 0:
+								message = message + "\n\nThe checkout period for this locker may be renewed up to " + locker.total_renewals_possible + "times."
+							tx.send_text(sms.phone, message)
+							tx.send_text_to_host(locker.host_number, sms.phone, message)
 				else:
 					print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
 	time.sleep(15)
-
+	
 
 #check for incoming sms messages
 
