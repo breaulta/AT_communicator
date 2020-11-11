@@ -202,6 +202,7 @@ class Transmitter:
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
+		print "Send text has been called with number " + number + " and message " + message
 		#Make sure texting is turned on in the SIM card.
 		current_sms_mode = self.check_sms_mode()
 		if current_sms_mode == "text_mode_off":

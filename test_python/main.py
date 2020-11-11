@@ -27,7 +27,7 @@ sms_database_filename = "sms_database.json"
 tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
 #CODE TO WRITE: locker due date reminder text
-
+#Two lockers of the same name check?
 
 #infinite loop
 while(1):
@@ -58,12 +58,12 @@ while(1):
 				#Extract the text content from the incomming sms message.
 				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
-					print "we're trying to check out the locker 3"
+					print "we just matched the regex " + locker.name + " : " + m.groups()[0]
 					user_text_input = m.groups()[0]
 					#Does the user input match the name of a locker to be checked out.
 					#Match case-insensitively the name of the locker to the text message.
 					if user_text_input.lower() == locker.name.lower():
-						print "we're trying to check out the locker 2"
+						print "our name match: " + user_text_input + " " + locker.name
 						#Check if the user has any other lockers checked out in this cluster.
 						if main_lockers.user_has_locker_checkedout(sms.phone):
 							#block them from checking out
@@ -81,8 +81,11 @@ while(1):
 							#If renewals are possible, let user know.
 							if locker.total_renewals_possible > 0:
 								message = message + "\n\nThe checkout period for this locker may be renewed up to " + locker.total_renewals_possible + "times."
+							message = "a simple message"
+							print "We're planning on sending the message: ~" + message + "~"
 							tx.send_text(sms.phone, message)
 							tx.send_text_to_host(locker.host_number, sms.phone, message)
+							print "We've hopefully just sent that message"
 				else:
 					print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
 	time.sleep(15)
