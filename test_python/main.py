@@ -29,6 +29,9 @@ tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 #CODE TO WRITE: locker due date reminder text
 #Two lockers of the same name check?
 
+#MORE CODE:
+#Did we ever check on phone numbers with hyphens for texting?
+
 #infinite loop
 while(1):
 	#Read in any potential new texts (incoming sms).
