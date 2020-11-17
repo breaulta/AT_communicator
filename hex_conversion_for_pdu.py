@@ -5,6 +5,7 @@ import binascii
 message = 'hello world'
 hex_message = ''
 for c in message:
+	#removes the first 2 digits
 	hex_message += hex(ord(c))[2:]
 
 print hex_message
@@ -12,7 +13,6 @@ print hex_message
 print binascii.b2a_hex(message)
 
 
-exit(0)
 
 uni = u'\u054c'
 print uni
