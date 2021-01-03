@@ -209,6 +209,9 @@ class Transmitter:
 			set_sms_mode("1")
 		elif current_sms_mode == "text_mode_error":
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
+		
+		#Check if the text is too long, calling send_long_text() if so.
+
 		#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
 		response1 = self.send_AT('AT+CMGS="' + number + '"\r\n') 
 		response2 = self.send_AT( message + chr(26), 1)
