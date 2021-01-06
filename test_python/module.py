@@ -200,9 +200,18 @@ class Transmitter:
 		if (not ok):
 			raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
 
+	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
+	def send_long_text(self, number, message):
+		
+
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
 		print "Send text has been called with number " + number + " and message " + message
+
+		#We've reached the upper limit of a single SMS; send multi-part instead.
+		if len(message) > 160:
+			send_long_text(number, message)
+
 		#Make sure texting is turned on in the SIM card.
 		current_sms_mode = self.check_sms_mode()
 		if current_sms_mode == "text_mode_off":
