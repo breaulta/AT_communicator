@@ -4,6 +4,12 @@ import serial
 import re
 import json
 import os
+
+#GSM-7 mapping. https://en.wikipedia.org/wiki/GSM_03.38
+gsm = (u"@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>"
+   u"?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäöñüà")
+ext = (u"````````````````````^```````````````````{}`````\\````````````[~]`"
+   u"|````````````````````````````````````€``````````````````````````")
  
 class Transmitter:
 	#Initalize Transmitter object attributes.
@@ -200,8 +206,49 @@ class Transmitter:
 		if (not ok):
 			raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
 
+	def packSeptets(octets, padBits=6):
+
+		result = bytearray()
+		octets = iter(octets)
+		shift = padBits
+		#Hardcoding padBits = 6, zeros need to be shifted in from prevSeptet.
+		prevSeptet = 0x00
+		for octet in octets:
+			septet = octet & 0x7f;
+			if shift == 7:
+				# prevSeptet has already been fully added to result
+				shift = 0
+				prevSeptet = septet
+				continue
+			b = ((septet << (7 - shift)) & 0xFF) | (prevSeptet >> shift)
+			prevSeptet = septet
+			shift += 1
+			result.append(b)
+			#print hex(b)
+		if shift != 7:
+			# There is a bit "left over" from prevSeptet
+			result.append(prevSeptet >> shift)
+
+		return result
+
+	def encode_gsm_octets(plaintext):
+		if type(plaintext) != str:
+			 plaintext = str(plaintext)
+		result = bytearray()
+		for c in plaintext.decode('utf-8'):
+			idx = gsm.find(c)
+			if idx != -1:
+				result.append(idx)
+			else:
+				idx = ext.find(c)
+				if idx != -1:
+					result.append(27)
+					result.append(idx)
+		return result
+
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
+		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
 		
 
 	#Sends a text to the specified number, with the specified message.
