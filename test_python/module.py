@@ -31,6 +31,9 @@ class Transmitter:
 			defined_qmi_path = kwargs['qmi_path']
 		else:
 			defined_qmi_path = '/dev/cdc-wdm0'
+		#Globals for Concatenated Short Messages (PDU)
+		self.message_ref = 0
+		self.CSM_ref = 0
 		self.ensure_sim_card_connected_to_network(defined_qmi_path)
 
 	#Configure serial connection settings.
@@ -211,7 +214,7 @@ class Transmitter:
 		result = bytearray()
 		octets = iter(octets)
 		shift = padBits
-		#Hardcoding padBits = 6, zeros need to be shifted in from prevSeptet.
+		#zeros need to be shifted in from prevSeptet in order to insert padding bits.
 		prevSeptet = 0x00
 		for octet in octets:
 			septet = octet & 0x7f;
@@ -248,8 +251,33 @@ class Transmitter:
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
-		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
+		service_center_address = '00'		#Value of 00 tells the modem to use the default address.
+		#1 in the least sig bit indicates SMS-SUBMIT. 1 in the 7th least sig bit indicates the presence of the User Data Header.
+		#b 0100 0001 = 0x41
+		message_type_indicator = '41'
+		#self.message_ref					#Counts up for each pdu short message we send.
+		DA_len = '0B'						#Indicates the length of the Destination Address.
+		destination_address = ''			#Reverse nibble, Binary Coded Decimal, ending with F.
+		protocol_ID = '00'					#Value of 00 indicates a 'normal SMS'
+		data_coding_scheme = '00'			#Value of 00 indicates that the payload will be coded in GSM-7.
+		user_data_length = ''				#Length of the payload in septets.
+		user_data_header_length = '05'		#A static 5 octets will be the length of the UDH for our CSM usage.
+		information_element_identifier = '00'	#Value of 00 indicates that this IE will be a CSM header.
+		IEI_length = '03'						#The IE will be 3 octets long.
+		#Concatenated short message (CSM) reference number.  Will remain the same for each group of CSM.
+		#self.CSM_ref						#Unique identifier for Concatenated Short Message group.
+		total_CSM = ''						#Number of parts of the CSM group.
+		sequence_CSM = ''					#The order of the current part.
+		user_data = ''						#GSM-7 encoded payload data.
 		
+		message_list_pdu = []
+		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
+		message_list_pdu = divide_text(message)
+		
+		
+		for message in message_list_pdu:
+			#calculate 
+			#Add header
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
@@ -266,8 +294,6 @@ class Transmitter:
 		elif current_sms_mode == "text_mode_error":
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
 		
-		#Check if the text is too long, calling send_long_text() if so.
-
 		#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
 		response1 = self.send_AT('AT+CMGS="' + number + '"\r\n') 
 		response2 = self.send_AT( message + chr(26), 1)
