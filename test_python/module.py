@@ -249,6 +249,21 @@ class Transmitter:
 					result.append(idx)
 		return result
 
+	def convert_to_DA(number):
+		if len(number) == 10:
+			destination_address = '1' + number
+		elif len(number) == 11:
+			destination_address = number
+		else:
+			raise Exception("Failed to convert to Destination Address: input has the wrong number of digits!")
+		destination_address = destination_address + 'F'
+		result = ''
+		for i in xrange(0, len(destination_address), 2):
+			#(Take slice from i to (i+2)-1 [i:i+2]) (and reverse it [::-1])
+			octet = destination_address[i:i+2][::-1]
+			result = result + octet
+		print result
+
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
 		service_center_address = '00'		#Value of 00 tells the modem to use the default address.
@@ -264,12 +279,12 @@ class Transmitter:
 		user_data_header_length = '05'		#A static 5 octets will be the length of the UDH for our CSM usage.
 		information_element_identifier = '00'	#Value of 00 indicates that this IE will be a CSM header.
 		IEI_length = '03'						#The IE will be 3 octets long.
-		#Concatenated short message (CSM) reference number.  Will remain the same for each group of CSM.
 		#self.CSM_ref						#Unique identifier for Concatenated Short Message group.
 		total_CSM = ''						#Number of parts of the CSM group.
 		sequence_CSM = ''					#The order of the current part.
 		user_data = ''						#GSM-7 encoded payload data.
-		
+
+		destination_address = convert_to_DA(number)	
 		message_list_pdu = []
 		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
 		message_list_pdu = divide_text(message)
