@@ -47,13 +47,49 @@ def getBytes(plaintext):
                 result.append(idx)
     return result 
 
+def divideTextGsm7(plainText):
+    result = []
+
+    plainStartPtr = 0
+    plainStopPtr  = 0
+    chunkByteSize = 0
+
+    while plainStopPtr < len(plainText):
+        char = plainText[plainStopPtr]
+        idx = gsm.find(char)
+        if idx != -1:
+            chunkByteSize = chunkByteSize + 1;
+        elif char in ext:
+            chunkByteSize = chunkByteSize + 2;
+        else:
+            raise ValueError('Cannot encode char "{0}" using GSM-7 encoding'.format(char))
+
+        plainStopPtr = plainStopPtr + 1
+        if chunkByteSize > 153:
+            plainStopPtr = plainStopPtr - 1
+
+        if chunkByteSize >= 153:
+            result.append(plainText[plainStartPtr:plainStopPtr])
+            plainStartPtr = plainStopPtr
+            chunkByteSize = 0
+
+    if chunkByteSize > 0:
+        result.append(plainText[plainStartPtr:])
+
+    return result
+
 def gsm_pack_and_encode(plaintext):
 	octets = getBytes(plaintext)
+	print 'octets then septets'
+	print octets
 	septets = packSeptets(octets)
-	text = []
+	print septets
+	#text = []
+	text = ''
 	for septet in septets:
 		#print hex(septet)
-		text.append(chr(septet).encode('hex').upper())
+		text = text + chr(septet).encode('hex').upper()
+		#text.append(chr(septet).encode('hex').upper())
 	return text
 
 def get_encode(currentByte, index, bitRightCount, position, nextPosition, leftShiftCount, bytesLength, bytes):
@@ -152,6 +188,21 @@ print ( "".join(gsm_pack_and_encode("e eu fugiat nulla pariatur.Excepteur sint o
 print (gsm_encode("e eu fugiat nulla pariatur.Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."))
 
 print (gsm_decode("6550B90E32D7CFE9301DE4AEB3D961103C2C4F87E975B9AB881F97E1F4725D0E9AA7DD74D07B3C0E97C7613A685C87A7C9617A980E72BFDD20B8FC9D2697DD7416685E77D3416937685C67C3C3A0783D0D7A9BCDE9713A0C2297E76579DD4D07B5DF6C769A0E0ABBD36D509A0C2ACFE9207658FC96D7DB2E"))
+
+lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+carrot = "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ERwlkgfop-sdkfopdjkqiopjfeiopjiopfdeawkjafklds;jfewiojfjheiojaiofjadilsjs;alkkljgklfkogjmoeirpjiofjerasio;p"
+
+result = []
+result = divideTextGsm7(lorem)
+
+for res in result:
+	print res
+	print ("length: " + str(len(res)))
+	print gsm_encode(res)
+	#encoded = "".join(gsm_pack_and_encode(res))
+	encoded = gsm_pack_and_encode(res)
+	print (encoded) 
 
 """
 encoded: 6550B90E32D7CFE9301DE4AEB3D961103C2C4F87E975B9AB881F97E1F4725D0E9AA7DD74D07B3C0E97C7613A685C87A7C9617A980E72BFDD20B8FC9D2697DD7416685E77D3416937685C67C3C3A0783D0D7A9BCDE9713A0C2297E76579DD4D07B5DF6C769A0E0ABBD36D509A0C2ACFE9207658FC96D7DB2E
