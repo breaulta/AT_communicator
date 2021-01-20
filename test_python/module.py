@@ -210,7 +210,7 @@ class Transmitter:
 		if (not ok):
 			raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
 
-	def packSeptets(octets, padBits=6):
+	def packSeptets(self, octets, padBits=6):
 
 		result = bytearray()
 		octets = iter(octets)
@@ -235,7 +235,7 @@ class Transmitter:
 
 		return result
 
-	def encode_gsm_octets(plaintext):
+	def encode_gsm_octets(self, plaintext):
 		if type(plaintext) != str:
 			 plaintext = str(plaintext)
 		result = bytearray()
@@ -250,7 +250,7 @@ class Transmitter:
 					result.append(idx)
 		return result
 
-	def divide_text(plainText):
+	def divide_text(self, plainText):
 		result = []
 
 		plainStartPtr = 0
@@ -281,7 +281,7 @@ class Transmitter:
 
 		return result
 
-	def convert_to_DA(number):
+	def convert_to_DA(self, number):
 		if len(number) == 10:
 			destination_address = '1' + number
 		elif len(number) == 11:
@@ -304,7 +304,7 @@ class Transmitter:
 		message_type_indicator = 0x41
 		#self.message_ref					#Counts up for each pdu short message we send.
 		DA_len = 0x0B						#Indicates the length of the Destination Address.
-		destination_address = convert_to_DA(number)	#Reverse nibble, Binary Coded Decimal, ending with F.
+		destination_address = self.convert_to_DA(number)	#Reverse nibble, Binary Coded Decimal, ending with F.
 		protocol_ID = 0x00					#Value of 00 indicates a 'normal SMS'
 		data_coding_scheme = 0x00			#Value of 00 indicates that the payload will be coded in GSM-7.
 		user_data_length = 0x00				#Length of the payload in septets.
@@ -318,12 +318,12 @@ class Transmitter:
 
 		message_list_pdu = []
 		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
-		message_list_pdu = divide_text(message)
+		message_list_pdu = self.divide_text(message)
 		total_CSM_parts = len(message_list_pdu)
 		pdus = []
 		for SM_part in message_list_pdu:
 			pdu = bytearray()
-			octets = getBytes(SM_part)		#byte array
+			octets = self.getBytes(SM_part)		#byte array
 			user_data_length = len(octets) + 6		#number of septets + 6 for the number of octets in the UDH (this seems wrong)
 			print "udl = " + user_data_length
 			user_data = packSeptets(octets)	#byte array
@@ -348,7 +348,7 @@ class Transmitter:
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
 			print(pdu)
 			
-	def gsm_pack_and_encode(plaintext):
+	def gsm_pack_and_encode(self, plaintext):
 		octets = getBytes(plaintext)
 		septets = packSeptets(octets)
 		text = []
