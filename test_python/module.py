@@ -347,7 +347,8 @@ class Transmitter:
 			pdu.extend(user_data)
 			print("AT length: " + str(len(pdu) -1))
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
-			print(pdu)
+			for byte in pdu:
+				print hex(byte)
 			
 	def gsm_pack_and_encode(self, plaintext):
 		octets = getBytes(plaintext)
@@ -370,7 +371,7 @@ class Transmitter:
 		#Make sure texting is turned on in the SIM card.
 		current_sms_mode = self.check_sms_mode()
 		if current_sms_mode == "text_mode_off":
-			set_sms_mode("1")
+			self.set_sms_mode("1")
 		elif current_sms_mode == "text_mode_error":
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
 		
