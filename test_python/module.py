@@ -364,7 +364,7 @@ class Transmitter:
 
 		#We've reached the upper limit of a single SMS; send multi-part instead.
 		if len(message) > 160:
-			send_long_text(number, message)
+			self.send_long_text(number, message)
 
 		#Make sure texting is turned on in the SIM card.
 		current_sms_mode = self.check_sms_mode()
