@@ -289,12 +289,13 @@ class Transmitter:
 		else:
 			raise Exception("Failed to convert to Destination Address: input has the wrong number of digits!")
 		destination_address = destination_address + 'F'
-		result = ''
+		result = bytearray()
 		for i in xrange(0, len(destination_address), 2):
 			#(Take slice from i to (i+2)-1 [i:i+2]) (and reverse it [::-1])
 			octet = destination_address[i:i+2][::-1]
-			result = result + octet
-		print result
+			number = int(octet, 16)
+			result.append(number)
+		return result
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
