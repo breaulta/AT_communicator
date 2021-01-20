@@ -345,20 +345,18 @@ class Transmitter:
 			pdu.append(CSM_sequence_number)
 			CSM_sequence_number += 1
 			pdu.extend(user_data)
-			print("AT length: " + str(len(pdu) -1))
+
+			pdu_length = str(len(pdu))
+			print("AT length: " + pdu_length)
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
+			pdu_string = ''
 			for byte in pdu:
-				print hex(byte)
-			
-	def gsm_pack_and_encode(self, plaintext):
-		octets = getBytes(plaintext)
-		septets = packSeptets(octets)
-		text = []
-		for septet in septets:
-			#print hex(septet)
-			#text = text + chr(septet).encode('hex').upper()
-			text.append(chr(septet).encode('hex').upper())
-		return text
+				pdu_string += hex(ord(byte))[2:]
+			print(pdu_string)
+			self.set_sms_mode('0')
+			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
+			#response1 = self.send_AT('AT+CMGS="' + pdu_length + '"\r\n') 
+			#response2 = self.send_AT( message + chr(26), 1)
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
