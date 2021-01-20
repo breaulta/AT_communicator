@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import time
 import serial
 import re
@@ -32,8 +33,8 @@ class Transmitter:
 		else:
 			defined_qmi_path = '/dev/cdc-wdm0'
 		#Globals for Concatenated Short Messages (PDU)
-		self.message_ref = 0
-		self.CSM_ref = 0
+		self.message_ref = 0x00
+		self.CSM_ref = 0x00
 		self.ensure_sim_card_connected_to_network(defined_qmi_path)
 
 	#Configure serial connection settings.
@@ -297,46 +298,65 @@ class Transmitter:
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
-		service_center_address = '00'		#Value of 00 tells the modem to use the default address.
+		service_center_address = 0x00		#Value of 00 tells the modem to use the default address.
 		#1 in the least sig bit indicates SMS-SUBMIT. 1 in the 7th least sig bit indicates the presence of the User Data Header.
 		#b 0100 0001 = 0x41
-		message_type_indicator = '41'
+		message_type_indicator = 0x41
 		#self.message_ref					#Counts up for each pdu short message we send.
-		DA_len = '0B'						#Indicates the length of the Destination Address.
+		DA_len = 0x0B						#Indicates the length of the Destination Address.
 		destination_address = convert_to_DA(number)	#Reverse nibble, Binary Coded Decimal, ending with F.
-		protocol_ID = '00'					#Value of 00 indicates a 'normal SMS'
-		data_coding_scheme = '00'			#Value of 00 indicates that the payload will be coded in GSM-7.
-		user_data_length = 0				#Length of the payload in septets.
-		user_data_header_length = '05'		#A static 5 octets will be the length of the UDH for our CSM usage.
-		information_element_identifier = '00'	#Value of 00 indicates that this IE will be a CSM header.
-		IEI_length = '03'						#The IE will be 3 octets long.
+		protocol_ID = 0x00					#Value of 00 indicates a 'normal SMS'
+		data_coding_scheme = 0x00			#Value of 00 indicates that the payload will be coded in GSM-7.
+		user_data_length = 0x00				#Length of the payload in septets.
+		user_data_header_length = 0x05		#A static 5 octets will be the length of the UDH for our CSM usage.
+		information_element_identifier = 0x00	#Value of 00 indicates that this IE will be a CSM header.
+		IEI_length = 0x03						#The IE will be 3 octets long.
 		#self.CSM_ref						#Unique identifier for Concatenated Short Message group.
-		total_CSM_parts = 0						#Number of parts of the CSM group.
-		CSM_sequence_number = 1					#The current iteration of the part (starting with 1).
-		user_data = ''						#GSM-7 encoded payload data.
+		total_CSM_parts = 0x00						#Number of parts of the CSM group.
+		CSM_sequence_number = 0x01					#The current iteration of the part (starting with 1).
+		user_data = bytearray()					#GSM-7 encoded payload data.
 
 		message_list_pdu = []
 		#divide the long text into segments that won't cause errors (hex length <= 153), keeping the extended alphabet in mind.
 		message_list_pdu = divide_text(message)
 		total_CSM_parts = len(message_list_pdu)
+		pdus = []
 		for SM_part in message_list_pdu:
 			pdu = bytearray()
 			octets = getBytes(SM_part)		#byte array
-			user_data_length = len(octets) + 6		#number of septets + 6 for the number of octets in the UDH
+			user_data_length = len(octets) + 6		#number of septets + 6 for the number of octets in the UDH (this seems wrong)
+			print "udl = " + user_data_length
 			user_data = packSeptets(octets)	#byte array
-
+			pdu.append(service_center_address)
+			pdu.append(message_type_indicator)
+			pdu.append(self.message_ref)
+			self.message_ref += 1
+			pdu.append(DA_len)
+			pdu.extend(destination_address)
+			pdu.append(protocol_ID)
+			pdu.append(data_coding_scheme)
+			pdu.append(user_data_length)
+			pdu.append(user_data_header_length)
+			pdu.append(information_element_identifier)
+			pdu.append(IEI_length)
+			pdu.append(self.CSM_ref)
+			pdu.append(total_CSM_parts)
+			pdu.append(CSM_sequence_number)
+			CSM_sequence_number += 1
+			pdu.extend(user_data)
+			print("AT length: " + str(len(pdu) -1))
+			print("SM part " + str(CSM_sequence_number - 1) + ":")
+			print(pdu)
 			
 def gsm_pack_and_encode(plaintext):
-    octets = getBytes(plaintext)
-    septets = packSeptets(octets)
-    text = []
-    for septet in septets:
-        #print hex(septet)
-text = text + chr(septet).encode('hex').upper()
-        text.append(chr(septet).encode('hex').upper())
-    return text
-
-		#if everything sent smoothly, increment CSM_ref and message_ref
+	octets = getBytes(plaintext)
+	septets = packSeptets(octets)
+	text = []
+	for septet in septets:
+		#print hex(septet)
+		#text = text + chr(septet).encode('hex').upper()
+		text.append(chr(septet).encode('hex').upper())
+	return text
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
