@@ -11,4 +11,4 @@ from little_free_locker import Lockers
 
 
 tx = Transmitter()
-tx.send_text('5417881121', 'Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault. Badbreault is TOP Breault.')
+tx.send_text('5417881121', '')
