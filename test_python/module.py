@@ -300,12 +300,15 @@ class Transmitter:
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	def send_long_text(self, number, message):
+		self.set_sms_mode('0')
+
 		service_center_address = 0x00		#Value of 00 tells the modem to use the default address.
 		#1 in the least sig bit indicates SMS-SUBMIT. 1 in the 7th least sig bit indicates the presence of the User Data Header.
 		#b 0100 0001 = 0x41
 		message_type_indicator = 0x41
 		#self.message_ref					#Counts up for each pdu short message we send.
 		DA_len = 0x0B						#Indicates the length of the Destination Address.
+		number_plan_ID = 0x91				#Indicates how to interpret the DA
 		destination_address = self.convert_to_DA(number)	#Reverse nibble, Binary Coded Decimal, ending with F.
 		protocol_ID = 0x00					#Value of 00 indicates a 'normal SMS'
 		data_coding_scheme = 0x00			#Value of 00 indicates that the payload will be coded in GSM-7.
@@ -334,6 +337,7 @@ class Transmitter:
 			pdu.append(self.message_ref)
 			self.message_ref += 1
 			pdu.append(DA_len)
+			pdu.append(number_plan_ID)
 			pdu.extend(destination_address)
 			pdu.append(protocol_ID)
 			pdu.append(data_coding_scheme)
@@ -354,7 +358,6 @@ class Transmitter:
 			for byte in pdu:
 				pdu_string += hex(byte)[2:].zfill(2)
 			print(pdu_string)
-			self.set_sms_mode('0')
 			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
 			response1 = self.send_AT('AT+CMGS=' + pdu_length + '\r\n') 
 			response2 = self.send_AT( pdu_string + chr(26), 1)
