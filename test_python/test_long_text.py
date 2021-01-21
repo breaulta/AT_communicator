@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #Don't write a pesky .pyc file.
 import sys
 sys.dont_write_bytecode = True
