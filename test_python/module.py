@@ -355,8 +355,8 @@ class Transmitter:
 			print(pdu_string)
 			self.set_sms_mode('0')
 			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
-			#response1 = self.send_AT('AT+CMGS="' + pdu_length + '"\r\n') 
-			#response2 = self.send_AT( message + chr(26), 1)
+			response1 = self.send_AT('AT+CMGS="' + pdu_length + '"\r\n') 
+			response2 = self.send_AT( pdu_string + chr(26), 1)
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
