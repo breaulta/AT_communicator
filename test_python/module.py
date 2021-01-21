@@ -330,7 +330,7 @@ class Transmitter:
 			pdu = bytearray()
 			octets = self.encode_gsm_octets(SM_part)		#byte array
 			user_data_length = len(octets) + 7		#number of septets + 7 for the number of octets in the UDH (this seems wrong)
-			print "udl = " + str(user_data_length - 1)
+			print "udl = " + str(user_data_length)
 			user_data = self.packSeptets(octets)	#byte array
 			pdu.append(service_center_address)
 			pdu.append(message_type_indicator)
@@ -351,7 +351,7 @@ class Transmitter:
 			CSM_sequence_number += 1
 			pdu.extend(user_data)
 
-			pdu_length = str(len(pdu))
+			pdu_length = str(len(pdu) - 1)
 			print("AT length: " + pdu_length)
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
 			pdu_string = ''
