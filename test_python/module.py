@@ -330,7 +330,7 @@ class Transmitter:
 			pdu = bytearray()
 			octets = self.encode_gsm_octets(SM_part)		#byte array
 			user_data_length = len(octets) + 7		#number of septets + 7 for the number of octets in the UDH (this seems wrong)
-			print "udl = " + str(user_data_length)
+			print "udl = " + str(user_data_length - 1)
 			user_data = self.packSeptets(octets)	#byte array
 			pdu.append(service_center_address)
 			pdu.append(message_type_indicator)
