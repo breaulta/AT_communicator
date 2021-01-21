@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#Without the previous 'coding' line, the gsm/ext mapping won't work with python 2.7
 import time
-import serial
+import serial		#Works on Len's pi. Looks like it's a tough, depreciated package otherwise.
 import re
 import json
 import os
@@ -329,7 +330,7 @@ class Transmitter:
 		for SM_part in message_list_pdu:
 			pdu = bytearray()
 			octets = self.encode_gsm_octets(SM_part)		#byte array
-			user_data_length = len(octets) + 7		#number of septets + 7 for the number of octets in the UDH (this seems wrong)
+			user_data_length = len(octets) + 7		#number of septets + 7 (49/7 = 7) 6 octets of bits = 48. need 1 bit to get to 49 which is divisible by 7.
 			print "udl = " + str(user_data_length)
 			user_data = self.packSeptets(octets)	#byte array
 			pdu.append(service_center_address)
