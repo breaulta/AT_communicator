@@ -351,7 +351,7 @@ class Transmitter:
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
 			pdu_string = ''
 			for byte in pdu:
-				pdu_string += hex(byte)[2:]
+				pdu_string += hex(byte)[2:].zfill(2)
 			print(pdu_string)
 			self.set_sms_mode('0')
 			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
