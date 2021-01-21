@@ -206,6 +206,7 @@ class Transmitter:
 	def set_sms_mode(self, sms_mode):
 		sms_mode = str(sms_mode) #convert num to string
 		sms_mode_response = self.send_AT('AT+CMGF=' + sms_mode)
+		print ("sms mode response: " + sms_mode_response)
 		ok = re.findall("OK", sms_mode_response)
 		if (not ok):
 			raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
