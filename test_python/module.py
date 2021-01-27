@@ -200,36 +200,43 @@ class Transmitter:
 		if (not ok):
 			raise Exception("SMS mode ", sms_mode, " was not successfully set\n")
 
+	#Original function source: https://guiott.com/GSMcontrol/Python_GSM/_modules/gsmmodem/pdu.html
+	#Given a bytearray of octets, pack into septets and return a bytearray of them.
 	def packSeptets(self, octets, padBits=6):
-
 		result = bytearray()
+		#Make the array iteratable. I think this allows the for loop to work on a bytearray.
 		octets = iter(octets)
 		shift = padBits
 		#zeros need to be shifted in from prevSeptet in order to insert padding bits.
 		prevSeptet = 0x00
 		for octet in octets:
-			septet = octet & 0x7f;
+			#For septet packing we do a bitwise and with the 7 least sig digits.
+			septet = octet & 0x7f;	
 			if shift == 7:
 				# prevSeptet has already been fully added to result
 				shift = 0
 				prevSeptet = septet
 				continue
+			#Bitmagic septet packing. An explaination for septet packing can be found here:
+			# https://www.codeproject.com/Tips/470755/Encoding-Decoding-7-bit-User-Data-for-SMS-PDU-PDU
 			b = ((septet << (7 - shift)) & 0xFF) | (prevSeptet >> shift)
 			prevSeptet = septet
 			shift += 1
 			result.append(b)
-			#print hex(b)
 		if shift != 7:
 			# There is a bit "left over" from prevSeptet
 			result.append(prevSeptet >> shift)
-
 		return result
 
+	#Convert a string of characters to GSM7 encoded bytearray.
+	#Original function source: https://guiott.com/GSMcontrol/Python_GSM/_modules/gsmmodem/pdu.html
 	def encode_gsm_octets(self, plaintext):
 		if type(plaintext) != str:
 			 plaintext = str(plaintext)
 		result = bytearray()
+		#Make sure chars are in utf-8 format.
 		for c in plaintext.decode('utf-8'):
+			#The index corresponds to the gsm7 number(int/hex/binary) representation.
 			idx = gsm.find(c)
 			if idx != -1:
 				result.append(idx)
@@ -240,13 +247,14 @@ class Transmitter:
 					result.append(idx)
 		return result
 
+	#Original function source: https://guiott.com/GSMcontrol/Python_GSM/_modules/gsmmodem/pdu.html
+	#Divides a long text that needs to be broken up and sent via PDU. Some GSM7 chars are 2 bytes long, 
+	# so this function makes sure that the converted octet length doesn't exceed 153.
 	def divide_text(self, plainText):
 		result = []
-
 		plainStartPtr = 0
 		plainStopPtr  = 0
 		chunkByteSize = 0
-
 		while plainStopPtr < len(plainText):
 			char = plainText[plainStopPtr]
 			idx = gsm.find(char)
@@ -256,21 +264,18 @@ class Transmitter:
 				chunkByteSize = chunkByteSize + 2;
 			else:
 				raise ValueError('Cannot encode char "{0}" using GSM-7 encoding'.format(char))
-
 			plainStopPtr = plainStopPtr + 1
 			if chunkByteSize > 153:
 				plainStopPtr = plainStopPtr - 1
-
 			if chunkByteSize >= 153:
 				result.append(plainText[plainStartPtr:plainStopPtr])
 				plainStartPtr = plainStopPtr
 				chunkByteSize = 0
-
 		if chunkByteSize > 0:
 			result.append(plainText[plainStartPtr:])
-
 		return result
 
+	#Converts a number string into the reverse nibble, Binary Coded Decimal bytearray needed for Concatenated Short Message.
 	def convert_to_DA(self, number):
 		if len(number) == 10:
 			destination_address = '1' + number
@@ -278,19 +283,22 @@ class Transmitter:
 			destination_address = number
 		else:
 			raise Exception("Failed to convert to Destination Address: input has the wrong number of digits!")
+		#F indicates the end of the Destination Address.
 		destination_address = destination_address + 'F'
 		result = bytearray()
+		#From 0 to the length of the DA, count i by 2.
 		for i in xrange(0, len(destination_address), 2):
 			#(Take slice from i to (i+2)-1 [i:i+2]) (and reverse it [::-1])
 			octet = destination_address[i:i+2][::-1]
+			#Convert the 16 bit octet string into a number.
 			number = int(octet, 16)
 			result.append(number)
 		return result
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
+	#Function composed from SMS/Octet map in a way that is easy to read, walk through.
 	def send_long_text(self, number, message):
-		self.set_sms_mode('0')
-
+		self.set_sms_mode('0')				#Set modem to PDU mode.
 		service_center_address = 0x00		#Value of 00 tells the modem to use the default address.
 		#1 in the least sig bit indicates SMS-SUBMIT. 1 in the 7th least sig bit indicates the presence of the User Data Header.
 		#b 0100 0001 = 0x41
@@ -305,9 +313,9 @@ class Transmitter:
 		user_data_header_length = 0x05		#A static 5 octets will be the length of the UDH for our CSM usage.
 		information_element_identifier = 0x00	#Value of 00 indicates that this IE will be a CSM header.
 		IEI_length = 0x03						#The IE will be 3 octets long.
-		#self.CSM_ref						#Unique identifier for Concatenated Short Message group.
-		total_CSM_parts = 0x00						#Number of parts of the CSM group.
-		CSM_sequence_number = 0x01					#The current iteration of the part (starting with 1).
+		#self.CSM_ref							#Unique identifier for Concatenated Short Message group.
+		total_CSM_parts = 0x00					#Number of parts of the CSM group.
+		CSM_sequence_number = 0x01				#The current iteration of the part (starting with 1).
 		user_data = bytearray()					#GSM-7 encoded payload data.
 
 		message_list_pdu = []
@@ -315,10 +323,14 @@ class Transmitter:
 		message_list_pdu = self.divide_text(message)
 		total_CSM_parts = len(message_list_pdu)
 		pdus = []
+		#Line up the bytes of each part and send it.
 		for SM_part in message_list_pdu:
 			pdu = bytearray()
 			octets = self.encode_gsm_octets(SM_part)		#byte array
-			user_data_length = len(octets) + 7		#number of septets + 7 (49/7 = 7) 6 octets of bits = 48. need 1 bit to get to 49 which is divisible by 7.
+			#(One of the) Fill bits calculation:
+			#UDHL+IEI+IEIL+CSM_ref+total_CSM_parts+CSM_sequence_number = 6 octets
+			#number of septets + 7: (49/7 = 7) 6 octets of bits = 48. Need 1 bit to get to 49 which is divisible by 7.
+			user_data_length = len(octets) + 7
 			print "udl = " + str(user_data_length)
 			user_data = self.packSeptets(octets)	#byte array
 			pdu.append(service_center_address)
@@ -327,6 +339,7 @@ class Transmitter:
 			self.message_ref += 1
 			pdu.append(DA_len)
 			pdu.append(number_plan_ID)
+			#Extend is used to concatenate arrays.
 			pdu.extend(destination_address)
 			pdu.append(protocol_ID)
 			pdu.append(data_coding_scheme)
@@ -339,12 +352,14 @@ class Transmitter:
 			pdu.append(CSM_sequence_number)
 			CSM_sequence_number += 1
 			pdu.extend(user_data)
-
+			#Don't count the service_center_address as it is not part of the PDU protocol layer.
 			pdu_length = str(len(pdu) - 1)
 			print("AT length: " + pdu_length)
 			print("SM part " + str(CSM_sequence_number - 1) + ":")
 			pdu_string = ''
+			#Python likes to remove preceeding zeros from hex numbers. This makes sure the zeros are not removed.
 			for byte in pdu:
+				#If there are fewer than 2 digits, fill with up to 2 zeros.
 				pdu_string += hex(byte)[2:].zfill(2)
 			print(pdu_string)
 			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
@@ -352,6 +367,8 @@ class Transmitter:
 			response2 = self.send_AT( pdu_string + chr(26), 1)
 			print('response1: ' + response1)
 			print('response2: ' + response2)
+		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
+		self.CSM_ref += 1
 
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
