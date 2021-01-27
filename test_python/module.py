@@ -15,31 +15,19 @@ ext = (u"````````````````````^```````````````````{}`````\\````````````[~]`"
  
 class Transmitter:
 	#Initalize Transmitter object attributes.
-	def __init__(self, **kwargs):
+	def __init__(self, port='/dev/ttyUSB2', qmi_path='/dev/cdc-wdm0', **kwargs):
 		#Ensure that we're running as root.
 		if not os.geteuid()==0:
 			raise Exception("Must run as root!")
-		#If a specific port is specified, connect to that port.
-		defined_port = ''
-		if 'port' in kwargs:
-			defined_port = kwargs['port']
-		else:
-			defined_port = '/dev/ttyUSB2'
-		self.usb_path = defined_port
-		self.__configure_ser_connection_to_usb(self.usb_path)
-		#If a specific QMICLI device path is specified, use that.
-		defined_qmi_path = ''
-		if 'qmi_path' in kwargs:
-			defined_qmi_path = kwargs['qmi_path']
-		else:
-			defined_qmi_path = '/dev/cdc-wdm0'
+		self.usb_path = port
+		self._configure_ser_connection_to_usb(self.usb_path)
 		#Globals for Concatenated Short Messages (PDU)
 		self.message_ref = 0x00
 		self.CSM_ref = 0x00
-		self.ensure_sim_card_connected_to_network(defined_qmi_path)
+		self.ensure_sim_card_connected_to_network(qmi_path)
 
 	#Configure serial connection settings.
-	def __configure_ser_connection_to_usb(self, usb_port):
+	def _configure_ser_connection_to_usb(self, usb_port):
 		self.ser = serial.Serial(
 			port=usb_port,
 			baudrate=9600,
@@ -59,7 +47,7 @@ class Transmitter:
 					time.sleep(5)
 			else:
 				time.sleep(15)
-		print "Function: __configure_ser_connection_to_usb\n Resetting sim hat because we hit the 'AT not responding' error."
+		print "Function: _configure_ser_connection_to_usb\n Resetting sim hat because we hit the 'AT not responding' error."
 		#We experienced a strange error where the AT (sim card) hat won't echo AT calls.  The only way we
 		#know of to fix it is to perform a QMICLI reset of the sim card (hat).
 		self._reset_sim_hat(self.usb_path)
@@ -69,7 +57,7 @@ class Transmitter:
 	#Must run as root
 	def ensure_sim_card_connected_to_network(self, sim_path):
 		#Check if our SIM card is connected to the network or not.
-		sim_mode = self.__get_qmicli_mode(sim_path)
+		sim_mode = self._get_qmicli_mode(sim_path)
 		#If not online, try to turn it on.
 		if sim_mode != "online":
 			#If sim/modem is reset when the serial connection is open, it will clobber /dev/ttyUSB2.
@@ -77,12 +65,12 @@ class Transmitter:
 			if self.ser.isOpen() == True:
 				self.ser.close()
 			print "Sim card was off, turning online."
-			self.__set_qmicli_mode('online', sim_path)
+			self._set_qmicli_mode('online', sim_path)
 			timeout_count = 0
 			#Verify that it comes online.
 			while(1):
 				time.sleep(10)
-				sim_mode = self.__get_qmicli_mode(sim_path)
+				sim_mode = self._get_qmicli_mode(sim_path)
 				if sim_mode == 'online':
 					#We're online! Escape bonds of while loop and return.
 					print "Successfuly set sim card online."
@@ -91,23 +79,23 @@ class Transmitter:
 				else:
 					print "Sim card is being reset to turn it online."
 					time.sleep(10)
-					self.__set_qmicli_mode('reset', sim_path)
+					self._set_qmicli_mode('reset', sim_path)
 					time.sleep(30)
 					#For potential debugging. We expect SIM mode = 'low-power' here after reset.
-					get_response = self.__get_qmicli_mode(sim_path)
+					get_response = self._get_qmicli_mode(sim_path)
 					if 'low-power' != get_response:
 						print "Warning, SIM Mode is: " + get_response
 					else:
 						print "We're in low power mode, please wait as we turn SIM online."
 					time.sleep(1)
-					self.__set_qmicli_mode('online', sim_path)
+					self._set_qmicli_mode('online', sim_path)
 					time.sleep(20)
 					timeout_count += 1
 					#Time out after a few minutes of trying
 					if timeout_count > 2:
 						raise Exception("The SIM card could not be set to online mode!")
 			#Turn serial connection back on after resetting sim/modem.
-			self.__configure_ser_connection_to_usb(self.usb_path)
+			self._configure_ser_connection_to_usb(self.usb_path)
 			return 1
 		#Looks like we're online! Return true.
 		else:
@@ -115,12 +103,12 @@ class Transmitter:
 
 	def _reset_sim_hat(self, sim_path):
 		#set offline
-		self.__set_qmicli_mode('offline', sim_path)
+		self._set_qmicli_mode('offline', sim_path)
 		#then call ensure_sim_connected
 		self.ensure_sim_card_connected_to_network(sim_path)
 
 	#Check to make sure the sim_path exists, which implies that the modem can accept qmicli commands
-	def __check_sim_path(self, sim_path):
+	def _check_sim_path(self, sim_path):
 		#qmicli clobbers path during 'reset' so the while loop ensures no false negatives.
 		timeout_count = 0
 		while timeout_count < 15:
@@ -133,13 +121,13 @@ class Transmitter:
 		raise Exception("The SIM card path " + sim_path + " does not exist!")
 
 	#Sets our SIM card to the specified mode (e.g. 'reset', 'online', etc).
-	def __set_qmicli_mode(self, mode, sim_path):
-		self.__check_sim_path(sim_path)
+	def _set_qmicli_mode(self, mode, sim_path):
+		self._check_sim_path(sim_path)
 		os.system("qmicli -d " + sim_path + " --dms-set-operating-mode='" + mode + "'")
 	
 	#Returns SIM card mode (e.g. 'offline', 'online', 'low-power', 'reset', etc.
-	def __get_qmicli_mode(self, sim_path):
-		self.__check_sim_path(sim_path)
+	def _get_qmicli_mode(self, sim_path):
+		self._check_sim_path(sim_path)
 		get_output = os.popen('qmicli -d ' + sim_path + ' --dms-get-operating-mode')
 		output_read = get_output.read()
 		mode_match = re.search("Mode: '([a-z-]+)'", output_read)
@@ -415,10 +403,10 @@ class Transmitter:
 	
 	#Deletes text with specified index from SIM card.			
 	def delete_text(self, index):
-		if self.__does_message_at_index_exist(index):
+		if self._does_message_at_index_exist(index):
 			command = 'AT+CMGD=' + index
 			self.send_AT(command)
-			if self.__does_message_at_index_exist(index):
+			if self._does_message_at_index_exist(index):
 				return "text at index '" + index + "' not deleted"
 			else:
 				return "text at index '" + index + "' deleted"
@@ -426,7 +414,7 @@ class Transmitter:
 			return "text at index '" + index + "' not found"
 		
 	#Probes SIM card to see if message at index exists.
-	def __does_message_at_index_exist(self, index):
+	def _does_message_at_index_exist(self, index):
 		sms_list = self.get_all_texts()
 		for sms in sms_list:
 			if sms.index == index:
@@ -435,7 +423,7 @@ class Transmitter:
 
 	#Saves array of SMS objects to json file.
 	def save_sms_obj_to_json_file(self, text_array, filename):
-		if self.__is_sms_array(text_array):
+		if self._is_sms_array(text_array):
 			#Create dictionary (hashlike structure)
 			data = {}
 			#Create an array 
@@ -464,7 +452,7 @@ class Transmitter:
 		return sms_array
 
 	def append_texts_to_db_file(self, sms_array, sms_database_file):
-		if self.__is_sms_array(sms_array):
+		if self._is_sms_array(sms_array):
 			#Write new sms messages to database.
 			#First check if sms database file exists.
 			try:
@@ -479,12 +467,12 @@ class Transmitter:
 				self.save_sms_obj_to_json_file(full_db_sms_array, sms_database_file)
 
 	def delete_texts_from_sim_card(self, sms_array):
-		if self.__is_sms_array(sms_array):
+		if self._is_sms_array(sms_array):
 			for sms in sms_array:
 				self.delete_text(sms.index)
 
 	#Do we have an array containing SMS objects
-	def __is_sms_array(self, sms_array):
+	def _is_sms_array(self, sms_array):
 		if len(sms_array) > 0:
 			for sms in sms_array:
 				if not isinstance(sms, SMS):
