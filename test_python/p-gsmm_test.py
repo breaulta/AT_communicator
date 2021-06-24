@@ -8,7 +8,7 @@ import logging
 #Don't write a pesky .pyc file.
 import sys
 sys.dont_write_bytecode = True
-sys.path.append('/path/to/application/app/folder')
+#sys.path.append('/path/to/application/app/folder')
 
 from gsmmodem.modem import GsmModem
 
