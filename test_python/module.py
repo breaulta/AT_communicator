@@ -15,10 +15,10 @@ gsm = (u"@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%
    u"?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäöñüà")
 ext = (u"````````````````````^```````````````````{}`````\\````````````[~]`"
    u"|````````````````````````````````````€``````````````````````````")
- 
+
 class Transmitter:
 	#Initalize Transmitter object attributes.
-	def __init__(self, port='/dev/ttyUSB2', qmi_path='/dev/cdc-wdm0', **kwargs):
+	def __init__(self, port='/dev/ttyUSB2', qmi_path='/dev/cdc-wdm0', baud='115200', **kwargs):
 		#Ensure that we're running as root.
 		if not os.geteuid()==0:
 			raise Exception("Must run as root!")
@@ -30,6 +30,8 @@ class Transmitter:
 		self.ensure_sim_card_connected_to_network(qmi_path)
 
 	#Add pgsmm modem connection
+	def _connect_to_modem(self, port, baud):
+		self.modem = GsmModem(port, baud)
 
 	#Configure serial connection settings.
 	def _configure_ser_connection_to_usb(self, usb_port):
