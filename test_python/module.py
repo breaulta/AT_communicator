@@ -7,6 +7,9 @@ import re
 import json
 import os
 
+#Import pgsmm functionality
+from gsmmodem.modem import GsmModem
+
 #GSM-7 mapping. https://en.wikipedia.org/wiki/GSM_03.38
 gsm = (u"@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>"
    u"?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäöñüà")
@@ -26,11 +29,13 @@ class Transmitter:
 		self.CSM_ref = 0x00
 		self.ensure_sim_card_connected_to_network(qmi_path)
 
+	#Add pgsmm modem connection
+
 	#Configure serial connection settings.
 	def _configure_ser_connection_to_usb(self, usb_port):
 		self.ser = serial.Serial(
 			port=usb_port,
-			baudrate=9600,
+			baudrate=9600,				#Might be able to increase this. pgsmm uses 115200
 			parity=serial.PARITY_NONE,
 			stopbits=serial.STOPBITS_TWO,
 			bytesize=serial.EIGHTBITS
@@ -137,6 +142,10 @@ class Transmitter:
 			print "Error: we could not read mode for:\n" + output_read
 			return 0
 
+	#Send AT command to modem using pgsmm.
+	def send_AT(self, AT):
+		
+
     #Send AT command to modem.
 	def send_AT(self, AT, waiting_for_chr_26 = 0):
 		#Open up our serial connection to the SIM
@@ -177,6 +186,7 @@ class Transmitter:
 			ser_response += self.ser.read(1)
 		return ser_response
 
+	#Remove this probably
 	#Check if SIM card configured for SMS text mode.
 	def check_sms_mode(self):
 		sms_mode = self.send_AT('AT+CMGF?')
@@ -191,6 +201,7 @@ class Transmitter:
 		#We ran into this bug once before, hopefully we can narrow it down with this exception:
 		raise Exception("Error: our CMGF query didn't return 1 or 0, here's what we got back: ~" + sms_mode + "~")
 
+	#Needed for long text
     #Set SMS for text mode. sms_mode of 1 = texting (this is what we want), 0 = Programmable data unit PDU.
 	def set_sms_mode(self, sms_mode):
 		sms_mode = str(sms_mode) #convert num to string
@@ -370,6 +381,7 @@ class Transmitter:
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
 
+	#Replace with pgsmm version
 	#Sends a text to the specified number, with the specified message.
 	def send_text(self, number, message):
 		print "Send text has been called with number " + number + " and message " + message
