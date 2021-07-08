@@ -38,6 +38,7 @@ class Transmitter:
 		print(check)
 
 	#Configure serial connection settings.
+	
 	def _configure_ser_connection_to_usb(self, usb_port):
 		self.ser = serial.Serial(
 			port=usb_port,
@@ -150,8 +151,12 @@ class Transmitter:
 
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
-		response = self.modem.write(AT)
-		return response
+		prune = self.modem.write(AT)
+		print('at: ', AT)
+		print('prune: ', prune)
+		response = re.search(r"[u'(.+)']", prune)
+		print(response.group(0))
+		return response.group(0)
 
     #Send AT command to modem.
 	#def send_AT(self, AT, waiting_for_chr_26 = 0):
