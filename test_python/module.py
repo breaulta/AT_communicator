@@ -22,17 +22,20 @@ class Transmitter:
 		#Ensure that we're running as root.
 		if not os.geteuid()==0:
 			raise Exception("Must run as root!")
-		self.usb_path = port
-		self._configure_ser_connection_to_usb(self.usb_path)
-		#self._connect_to_modem(self.port, self.baud)
+		self.ensure_sim_card_connected_to_network(qmi_path)
+		#self._configure_ser_connection_to_usb(self.usb_path)
+		self._connect_to_modem(port, baud)
 		#Globals for Concatenated Short Messages (PDU)
 		self.message_ref = 0x00
 		self.CSM_ref = 0x00
-		self.ensure_sim_card_connected_to_network(qmi_path)
 
 	#Add pgsmm modem connection
 	def _connect_to_modem(self, port, baud):
 		self.modem = GsmModem(port, baud)
+		print("connecting...")
+		self.modem.connect()
+		check = self.send_AT('AT')
+		print(check)
 
 	#Configure serial connection settings.
 	def _configure_ser_connection_to_usb(self, usb_port):
@@ -70,9 +73,9 @@ class Transmitter:
 		if sim_mode != "online":
 			#If sim/modem is reset when the serial connection is open, it will clobber /dev/ttyUSB2.
 			#So we close the serial connection while we perform the reset.
-			if self.ser.isOpen() == True:
-				self.ser.close()
-			print "Sim card was off, turning online."
+			#if self.ser.isOpen() == True:
+			#	self.ser.close()
+			#print "Sim card was off, turning online."
 			self._set_qmicli_mode('online', sim_path)
 			timeout_count = 0
 			#Verify that it comes online.
@@ -103,7 +106,7 @@ class Transmitter:
 					if timeout_count > 2:
 						raise Exception("The SIM card could not be set to online mode!")
 			#Turn serial connection back on after resetting sim/modem.
-			self._configure_ser_connection_to_usb(self.usb_path)
+			#self._configure_ser_connection_to_usb(self.usb_path)
 			return 1
 		#Looks like we're online! Return true.
 		else:
@@ -147,10 +150,11 @@ class Transmitter:
 
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
-		
+		response = self.modem.write(AT)
+		return response
 
     #Send AT command to modem.
-	def send_AT(self, AT, waiting_for_chr_26 = 0):
+	#def send_AT(self, AT, waiting_for_chr_26 = 0):
 		#Open up our serial connection to the SIM
 		self.ser.isOpen()   
 		#First send a simple 'AT' command, and confirm it returns 'OK'.
