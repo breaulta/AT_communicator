@@ -24,6 +24,7 @@ class Transmitter:
 			raise Exception("Must run as root!")
 		self.usb_path = port
 		self._configure_ser_connection_to_usb(self.usb_path)
+		#self._connect_to_modem(self.port, self.baud)
 		#Globals for Concatenated Short Messages (PDU)
 		self.message_ref = 0x00
 		self.CSM_ref = 0x00
