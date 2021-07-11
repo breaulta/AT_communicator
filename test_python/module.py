@@ -152,11 +152,11 @@ class Transmitter:
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
 		prune = self.modem.write(AT)
-		print('at: ', AT)
-		print('prune: ', prune)
-		response = re.search(r"[u'(.+)']", prune)
-		print(response.group(0))
-		return response.group(0)
+		#print('at: ', AT)
+		#print('prune: ', prune)
+		response = re.search("\[u'(.+)'\]", str(prune))
+		#print(response.group(1))
+		return response.group(1)
 
     #Send AT command to modem.
 	#def send_AT(self, AT, waiting_for_chr_26 = 0):
