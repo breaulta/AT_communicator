@@ -353,10 +353,15 @@ class Transmitter:
 				pdu_string += hex(byte)[2:].zfill(2)
 			print(pdu_string)
 			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
-			response1 = self.send_AT('AT+CMGS=' + pdu_length + '\r\n') 
-			response2 = self.send_AT( pdu_string + chr(26), 1)
-			print('response1: ' + response1)
-			print('response2: ' + response2)
+			#response1 = self.send_AT('AT+CMGS=' + pdu_length + '\r\n') 
+			#response2 = self.send_AT( pdu_string + chr(26), 1)
+			#print('response1: ' + response1)
+			#print('response2: ' + response2)
+
+			response1 = self.send_AT('AT+CMGS=' + pdu_length )
+
+			response2 = self.modem.write( pdu_string, timeout=50, writeTerm='\x1a')
+
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
 
