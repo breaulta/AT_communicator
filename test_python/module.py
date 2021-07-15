@@ -24,21 +24,28 @@ class Transmitter:
 			raise Exception("Must run as root!")
 		self.ensure_sim_card_connected_to_network(qmi_path)
 		#self._configure_ser_connection_to_usb(self.usb_path)
-		self._connect_to_modem(port, baud)
+		self._connect_to_modem(port, baud, qmi_path)
 		#Globals for Concatenated Short Messages (PDU)
 		self.message_ref = 0x00
 		self.CSM_ref = 0x00
 
 	#Add pgsmm modem connection
-	def _connect_to_modem(self, port, baud):
+	def _connect_to_modem(self, port, baud, qmi_path):
 		self.modem = GsmModem(port, baud)
 		print("connecting...")
 		self.modem.connect()
-		check = self.send_AT('AT')
-		print(check)
+		#This doesn't seem to work properly
+		#try:
+		#	self.modem.connect()
+		#except:
+		#	print('caught timeout error!')
+		#	self._reset_sim_hat(qmi_path)
+		#	self.modem.connect()
+		#print('outside try')
+
+		
 
 	#Configure serial connection settings.
-	
 	def _configure_ser_connection_to_usb(self, usb_port):
 		self.ser = serial.Serial(
 			port=usb_port,
@@ -365,6 +372,7 @@ class Transmitter:
 		elif current_sms_mode == "text_mode_error":
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
 		
+		#response1 = self.send_AT('AT+CMGS="' + number + '"') # + '"\r\n')
 		response1 = self.send_AT('AT+CMGS="' + number + '"') # + '"\r\n')
 		print('resp1')
 		print(response1)
@@ -372,7 +380,6 @@ class Transmitter:
 		response2 = self.modem.write( message, timeout=100, writeTerm='\x1a')
 		print('resp2')
 		print(response2)
-		#modem.close()
 
 
 	#Sends a text to the specified number, with the specified message.
