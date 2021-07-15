@@ -151,52 +151,12 @@ class Transmitter:
 
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
-		prune = self.modem.write(AT)
+		prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
 		#print('at: ', AT)
-		#print('prune: ', prune)
+		print('raw return from modem.write: ', prune)
 		response = re.search("\[u'(.+)'\]", str(prune))
 		#print(response.group(1))
 		return response.group(1)
-
-    #Send AT command to modem.
-	#def send_AT(self, AT, waiting_for_chr_26 = 0):
-		#Open up our serial connection to the SIM
-		self.ser.isOpen()   
-		#First send a simple 'AT' command, and confirm it returns 'OK'.
-		#This will indicate to us that our SIM is working and ready for more AT commands.
-		for filter_AT_response in range(15):
-			#If we're waiting for chr(26) inside a text message - an echo test won't work so break away!
-			if waiting_for_chr_26:
-				break
-			ok_response = ''
-			self.ser.write("AT\r\n")
-			while self.ser.inWaiting() > 0:
-				ok_response += self.ser.read(1)
-			#If our AT is ready, then break away.
-			if ok_response.startswith('AT'):
-				break
-			#If we've hit a weird error, and we're inside a text message, notify and fix it.
-			elif ok_response.endswith('> AT'):
-				print "We hit an unknown error, waiting for chr(26) to end AT text message!"
-				self.ser.write( "Sorry there was an error" + chr(26) )
-				while self.ser.inWaiting() > 0:
-					ok_response += self.ser.read(1)
-				print "Hopefully we fixed it, here is the AT response: ~" + ok_response + "~"
-				continue
-			time.sleep(5)
-			if filter_AT_response >= 14:
-				#raise Exception('Could not verify AT functionality by an AT echo')
-				print "Function: send_AT\n Resetting sim hat because we hit the 'AT not responding' error."
-				#We experienced a strange error where the AT (sim card) hat won't echo AT calls.  The only way we
-				#know of to fix it is to perform a QMICLI reset of the sim card (hat).
-				self._reset_sim_hat(self.usb_path)
-
-		self.ser.write(AT + "\r\n")
-		time.sleep(1)
-		ser_response = ''
-		while self.ser.inWaiting() > 0:
-			ser_response += self.ser.read(1)
-		return ser_response
 
 	#Remove this probably
 	#Check if SIM card configured for SMS text mode.
@@ -394,8 +354,29 @@ class Transmitter:
 		self.CSM_ref += 1
 
 	#Replace with pgsmm version
-	#Sends a text to the specified number, with the specified message.
+	#add perameter for 'spy' and 'flash' texts
 	def send_text(self, number, message):
+		print('enter send text')
+
+		#Make sure texting is turned on in the SIM card.
+		current_sms_mode = self.check_sms_mode()
+		if current_sms_mode == "text_mode_off":
+			self.set_sms_mode("1")
+		elif current_sms_mode == "text_mode_error":
+			raise Exception("SMS mode query error. There may be a problem with modem communication.")
+		
+		response1 = self.send_AT('AT+CMGS="' + number + '"') # + '"\r\n')
+		print('resp1')
+		print(response1)
+		time.sleep(1)
+		response2 = self.modem.write( message, timeout=100, writeTerm='\x1a')
+		print('resp2')
+		print(response2)
+		#modem.close()
+
+
+	#Sends a text to the specified number, with the specified message.
+	def oldsend_text(self, number, message):
 		print "Send text has been called with number " + number + " and message " + message
 
 		#We've reached the upper limit of a single SMS; send multi-part instead.

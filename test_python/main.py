@@ -39,6 +39,8 @@ while(1):
 	#Query sim/hat for any new texts it has received.
 	new_sms_array = tx.get_all_texts()
 
+	#Add a check in here to make reset the modem in case of a python-gsmmodem timeout issue.
+
 	#If there are texts in the new_sms_array, we know we have new texts to process.
 	if len(new_sms_array) > 0:
 		print "We have new messages!"
