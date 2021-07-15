@@ -35,15 +35,17 @@ class Transmitter:
 		print("connecting...")
 		self.modem.connect()
 		#This doesn't seem to work properly
+		#Brig notes: try to del the object
 		#try:
 		#	self.modem.connect()
 		#except:
 		#	print('caught timeout error!')
+		#	del self.modem
 		#	self._reset_sim_hat(qmi_path)
-		#	self.modem.connect()
-		#print('outside try')
-
-		
+		#	self._connect_to_modem(port, baud, qmi_path)
+			#self.modem = GsmModem(port, baud)
+			#self.modem.connect()
+		print('outside try')
 
 	#Configure serial connection settings.
 	def _configure_ser_connection_to_usb(self, usb_port):
@@ -122,7 +124,8 @@ class Transmitter:
 
 	def _reset_sim_hat(self, sim_path):
 		#set offline
-		self._set_qmicli_mode('offline', sim_path)
+		self._set_qmicli_mode('reset', sim_path)
+		time.sleep(5)
 		#then call ensure_sim_connected
 		self.ensure_sim_card_connected_to_network(sim_path)
 
@@ -360,7 +363,7 @@ class Transmitter:
 
 			response1 = self.send_AT('AT+CMGS=' + pdu_length )
 
-			response2 = self.modem.write( pdu_string, timeout=50, writeTerm='\x1a')
+			response2 = self.modem.write( pdu_string, timeout=100, writeTerm='\x1a')
 
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
