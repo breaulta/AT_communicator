@@ -362,7 +362,7 @@ class Transmitter:
 			#print('response2: ' + response2)
 
 			response1 = self.send_AT('AT+CMGS=' + pdu_length )
-
+			#writeterm is the termination character
 			response2 = self.modem.write( pdu_string, timeout=100, writeTerm='\x1a')
 
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
@@ -373,6 +373,7 @@ class Transmitter:
 	def send_text(self, number, message):
 		print('enter send text')
 
+		self.set_sms_mode('1')#Set modem to text mode. pgsmm might do this automatically.
 		#Make sure texting is turned on in the SIM card.
 		current_sms_mode = self.check_sms_mode()
 		if current_sms_mode == "text_mode_off":
@@ -385,6 +386,7 @@ class Transmitter:
 		print('resp1')
 		print(response1)
 		time.sleep(1)
+		#writeterm is the termination character
 		response2 = self.modem.write( message, timeout=100, writeTerm='\x1a')
 		print('resp2')
 		print(response2)
