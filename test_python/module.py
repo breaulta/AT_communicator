@@ -361,12 +361,17 @@ class Transmitter:
 			#print('response1: ' + response1)
 			#print('response2: ' + response2)
 
-			response1 = self.send_AT('AT+CMGS=' + pdu_length )
+			#response1 = self.send_AT('AT+CMGS=' + pdu_length )
+			CMGS = 'AT+CMGS=' + pdu_length
+			response1 = self.modem.write(CMGS, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
 			#writeterm is the termination character
 			response2 = self.modem.write( pdu_string, timeout=100, writeTerm='\x1a')
 
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
+	
+	#def send_AT(self, AT):
+		#prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
 
 	#Replace with pgsmm version
 	#add perameter for 'spy' and 'flash' texts
@@ -382,7 +387,8 @@ class Transmitter:
 			raise Exception("SMS mode query error. There may be a problem with modem communication.")
 		
 		#response1 = self.send_AT('AT+CMGS="' + number + '"') # + '"\r\n')
-		response1 = self.send_AT('AT+CMGS="' + number + '"') # + '"\r\n')
+		AT = 'AT+CMGS="' + number + '"'
+		response1 = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
 		print('resp1')
 		print(response1)
 		time.sleep(1)
