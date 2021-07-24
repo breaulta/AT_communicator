@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#This file sets up the pi to auto-start into our handler.
 #Don't create a pesky .pyc file.
 import sys
 sys.dont_write_bytecode = True
