@@ -47,32 +47,6 @@ class Transmitter:
 			#self.modem.connect()
 		print('outside try')
 
-	#Configure serial connection settings.
-	def _configure_ser_connection_to_usb(self, usb_port):
-		self.ser = serial.Serial(
-			port=usb_port,
-			baudrate=9600,				#Might be able to increase this. pgsmm uses 115200
-			parity=serial.PARITY_NONE,
-			stopbits=serial.STOPBITS_TWO,
-			bytesize=serial.EIGHTBITS
-		)
-		time.sleep(5)
-		#Ensure that AT command 'AT' returns echoed 'AT' (multiple tries if necessary).
-		for connection_attempt in range(15):
-			check_AT = self.send_AT('AT')
-			#Ensure that AT message is returned.
-			if check_AT:
-				if check_AT.startswith('AT'):
-					return
-				else:
-					time.sleep(5)
-			else:
-				time.sleep(15)
-		print "Function: _configure_ser_connection_to_usb\n Resetting sim hat because we hit the 'AT not responding' error."
-		#We experienced a strange error where the AT (sim card) hat won't echo AT calls.  The only way we
-		#know of to fix it is to perform a QMICLI reset of the sim card (hat).
-		self._reset_sim_hat(self.usb_path)
-
 	#Check that the SIM card via the Qmicli interface is connected to the mobile network.
 	#Default for raspberry pi + waveshare SIM7600 Hat is /dev/cdc-wdm0
 	#Must run as root
@@ -355,24 +329,14 @@ class Transmitter:
 				#If there are fewer than 2 digits, fill with up to 2 zeros.
 				pdu_string += hex(byte)[2:].zfill(2)
 			print(pdu_string)
-			#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
-			#response1 = self.send_AT('AT+CMGS=' + pdu_length + '\r\n') 
-			#response2 = self.send_AT( pdu_string + chr(26), 1)
-			#print('response1: ' + response1)
-			#print('response2: ' + response2)
-
-			#response1 = self.send_AT('AT+CMGS=' + pdu_length )
+			#Send the modem the CMGS command in the format to send a text out, where \x1a is the required ctrl+Z that denotes EOF
 			CMGS = 'AT+CMGS=' + pdu_length
 			response1 = self.modem.write(CMGS, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
-			#writeterm is the termination character
 			response2 = self.modem.write( pdu_string, timeout=100, writeTerm='\x1a')
 
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
 	
-	#def send_AT(self, AT):
-		#prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
-
 	#Replace with pgsmm version
 	#add perameter for 'spy' and 'flash' texts
 	def send_text(self, number, message):
@@ -397,34 +361,17 @@ class Transmitter:
 		print('resp2')
 		print(response2)
 
-
-	#Sends a text to the specified number, with the specified message.
-	def oldsend_text(self, number, message):
-		print "Send text has been called with number " + number + " and message " + message
-
-		#We've reached the upper limit of a single SMS; send multi-part instead.
-		if len(message) > 160:
-			self.send_long_text(number, message)
-
-		#Make sure texting is turned on in the SIM card.
-		current_sms_mode = self.check_sms_mode()
-		if current_sms_mode == "text_mode_off":
-			self.set_sms_mode("1")
-		elif current_sms_mode == "text_mode_error":
-			raise Exception("SMS mode query error. There may be a problem with modem communication.")
-		
-		#Send the modem the CMGS command in the format to send a text out, where chr(26) is the required ctrl+Z that denotes EOF
-		response1 = self.send_AT('AT+CMGS="' + number + '"\r\n') 
-		response2 = self.send_AT( message + chr(26), 1)
-
-	def send_text_to_host(self, host_number, tenant_number, message):
-		host_message = "Text sent to ~" + tenant_number +"~ :\n" + message 
-		self.send_text(host_number, host_message)
-
 	#Returns array of SMS objects, returning all texts on SIM card.
 	def get_all_texts(self):
 		sms_array = []
-		text_list = self.send_AT('AT+CMGL="ALL"')
+		#self.set_sms_mode('1')
+		#text_list = self.send_AT('AT+CMGL="ALL"')
+		#AT = 'AT+CMGL="ALL"'
+		#text_list = self.modem.write(AT, timeout=5, expectedResponseTermSeq='+CMGL:')
+
+		smslist = self.modem.listStoredSms(4, memory=None, delete=False)
+		return smslist
+
 		text_array = text_list.split('+CMGL:')
 		for text_array_index, text in enumerate(text_array):
 			text_regex = '^\s*([0-9]+),\"([A-Z\s]+)\",\"\+?1?([0-9]{10})\",\"[^\"]*\",\"([^\"]+)\"\s+(.*)$'	
