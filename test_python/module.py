@@ -30,6 +30,7 @@ class Transmitter:
 		self.CSM_ref = 0x00
 
 	#Add pgsmm modem connection
+	#May be necessary to catch timeout issues. Waiting on this till someone can manually reset if needed.
 	def _connect_to_modem(self, port, baud, qmi_path):
 		self.modem = GsmModem(port, baud)
 		print("connecting...")
@@ -135,7 +136,7 @@ class Transmitter:
 
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
-		prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
+		prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') # WRONG 
 		#print('at: ', AT)
 		print('raw return from modem.write: ', prune)
 		response = re.search("\[u'(.+)'\]", str(prune))
@@ -145,8 +146,12 @@ class Transmitter:
 	#Remove this probably
 	#Check if SIM card configured for SMS text mode.
 	def check_sms_mode(self):
-		sms_mode = self.send_AT('AT+CMGF?')
-		regex_mode_result = re.search("\+CMGF:\s+([01])", sms_mode)
+		at_command = 'AT+CMGF?'
+		sms_mode = self.modem.write(at_command, timeout=5)
+		print 'sms_mode:'
+		print sms_mode[0]
+		regex_mode_result = re.search("\+CMGF:\s+([01])", sms_mode[0])
+		print regex_mode_result
 		if regex_mode_result:
 			#If CMGF = 1, our sim is in text mode
 			if regex_mode_result.group(1) == '1':
