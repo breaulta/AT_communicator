@@ -134,6 +134,7 @@ class Transmitter:
 			print "Error: we could not read mode for:\n" + output_read
 			return 0
 
+	#remove
 	#Send AT command to modem using pgsmm.
 	def send_AT(self, AT):
 		prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') # WRONG 
@@ -366,6 +367,7 @@ class Transmitter:
 		print('resp2')
 		print(response2)
 
+	#pgsmm will replace
 	#Returns array of SMS objects, returning all texts on SIM card.
 	def get_all_texts(self):
 		sms_array = []
@@ -398,6 +400,7 @@ class Transmitter:
 				sms_array.append(sms_obj)
 		return sms_array
 	
+	#pgsmm will replace
 	#Deletes text with specified index from SIM card.			
 	def delete_text(self, index):
 		if self._does_message_at_index_exist(index):
@@ -410,6 +413,7 @@ class Transmitter:
 		else:
 			return "text at index '" + index + "' not found"
 		
+	#replace
 	#Probes SIM card to see if message at index exists.
 	def _does_message_at_index_exist(self, index):
 		sms_list = self.get_all_texts()
@@ -418,6 +422,7 @@ class Transmitter:
 				return 1
 		return 0
 
+	#replace
 	#Saves array of SMS objects to json file.
 	def save_sms_obj_to_json_file(self, text_array, filename):
 		if self._is_sms_array(text_array):
@@ -436,7 +441,8 @@ class Transmitter:
 			outfile = open(filename, 'w')
 			json.dump(data, outfile)
 			outfile.close()
-	
+
+	#remove	
 	#Returns array of SMS message objects taken from json file.
 	def json_file_to_sms_array(self, filename):
 		json_file = open(filename, 'r')
@@ -463,11 +469,13 @@ class Transmitter:
 				full_db_sms_array = db_sms_array + sms_array 
 				self.save_sms_obj_to_json_file(full_db_sms_array, sms_database_file)
 
+	#remove
 	def delete_texts_from_sim_card(self, sms_array):
 		if self._is_sms_array(sms_array):
 			for sms in sms_array:
 				self.delete_text(sms.index)
 
+	#remove
 	#Do we have an array containing SMS objects
 	def _is_sms_array(self, sms_array):
 		if len(sms_array) > 0:
@@ -477,6 +485,7 @@ class Transmitter:
 			#Array has elements, and those elements are SMS objects.
 			return 1
 
+#remove
 class SMS:
 		def __init__(self, index, status, phone, date, message):
 		#def __init__(self, index):
