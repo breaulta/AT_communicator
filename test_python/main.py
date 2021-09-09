@@ -13,6 +13,7 @@ sys.dont_write_bytecode = True
 if not os.geteuid()==0:
 	raise Exception("Must run as root!")
 
+from gsmmodem.modem import GsmModem
 from module import Transmitter
 from module import SMS
 from little_free_locker import Locker
