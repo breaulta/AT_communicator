@@ -32,7 +32,12 @@ tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
 #MORE CODE:
 #Did we ever check on phone numbers with hyphens for texting?
+#New Idea
+#On get text, do something
 
+#functionality
+
+#Old Idea
 #infinite loop
 while(1):
 	#Read in any potential new texts (incoming sms).
