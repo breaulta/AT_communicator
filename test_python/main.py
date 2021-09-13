@@ -14,6 +14,7 @@ if not os.geteuid()==0:
 	raise Exception("Must run as root!")
 
 from gsmmodem.modem import GsmModem
+#Probably not necessary anymore
 from module import Transmitter
 from module import SMS
 from little_free_locker import Locker
@@ -32,8 +33,12 @@ tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 
 #MORE CODE:
 #Did we ever check on phone numbers with hyphens for texting?
+
+#########################################################
+# Working without access to pi for testing: mark things that need unit testing with *TEST NEEDED*
 #New Idea
 #On get text, do something
+
 
 #functionality
 
