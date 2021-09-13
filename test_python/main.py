@@ -35,7 +35,17 @@ tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 #Did we ever check on phone numbers with hyphens for texting?
 
 #########################################################
+# New code to implement python-gsmmodem.
 # Working without access to pi for testing: mark things that need unit testing with *TEST NEEDED*
+#########################################################
+
+#Initialize Modem
+modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
+#Sets modem to PDU mode, not sure why they do this in the example text...
+modem.smsTextMode = False
+modem.connect()
+#*TEST NEEDED*
+
 #New Idea
 #On get text, do something
 
