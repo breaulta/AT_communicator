@@ -46,6 +46,11 @@ modem.smsTextMode = False
 modem.connect()
 #*TEST NEEDED*
 
+#Called when pgsmm detects an incoming text
+#sms attributes: number, text, smsc, time
+#*TEST NEEDED*
+#probably others; print out the contents of the sms array to find out
+def handleSms(incoming_sms):
 #New Idea
 #On get text, do something
 
