@@ -51,6 +51,7 @@ modem.connect()
 #*TEST NEEDED*
 #probably others; print out the contents of the sms array to find out
 def handleSms(incoming_sms):
+	
 #New Idea
 #On get text, do something
 
@@ -87,6 +88,7 @@ while(1):
 			for locker in main_lockers.lockers:
 				#In order for the (\b) to work we needed the r.
 				#Extract the text content from the incomming sms message.
+				#
 				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
 				if m:
 					print "we just matched the regex " + locker.name + " : " + m.groups()[0]
@@ -125,6 +127,7 @@ while(1):
 #check for incoming sms messages
 
 #act on that sms message smartly
+#	Decode?
 
 #save the sms
 
