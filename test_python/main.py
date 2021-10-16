@@ -39,7 +39,7 @@ tx = Transmitter(port = '/dev/ttyUSB2', qmi_path = '/dev/cdc-wdm0')
 # Working without access to pi for testing: mark things that need unit testing with *TEST NEEDED*
 #########################################################
 
-#Initialize Modem
+#Initialize Modem, set to call handleSms() when a text is received.
 modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
 #Sets modem to PDU mode, not sure why they do this in the example text...
 modem.smsTextMode = False
@@ -48,79 +48,47 @@ modem.connect()
 
 #Called when pgsmm detects an incoming text
 #sms attributes: number, text, smsc, time
-#*TEST NEEDED*
+#*TEST NEEDED* to reveal the contents of the sms array
 #probably others; print out the contents of the sms array to find out
+#*TEST NEEDED* Check if old functionality works with sms call back system below
 def handleSms(incoming_sms):
-	
-#New Idea
-#On get text, do something
-
-
-#functionality
-
-#Old Idea
-#infinite loop
-while(1):
-	#Read in any potential new texts (incoming sms).
-	print "We're running get all texts now!"
-	#Query sim/hat for any new texts it has received.
-	new_sms_array = tx.get_all_texts()
-
-	#Add a check in here to make reset the modem in case of a python-gsmmodem timeout issue.
-
-	#If there are texts in the new_sms_array, we know we have new texts to process.
-	if len(new_sms_array) > 0:
-		print "We have new messages!"
-		#Save any new texts from the sim card to the pi's hard drive.
-		tx.append_texts_to_db_file(new_sms_array, sms_database_filename)
-		#Now that we've saved them from the hard drive, we can delete from the sim card.
-		tx.delete_texts_from_sim_card(new_sms_array)
-
-		#~~~~~~~~~~~~~~~~~~~~
-		#		locker.respond_to_new_texts(tx, new_sms_array)
-		# not sure if we wanted to make this method or were going to do it another way.
-		#~~~~~~~~~~~~~~~~~~
-
-		#Little free locker response to new texts
-		for sms in new_sms_array:
-			print "received sms message: ~" + sms.message + "~" #debugging
-			#Cycle through lockers to see if the incomming sms matches a locker name.
-			for locker in main_lockers.lockers:
-				#In order for the (\b) to work we needed the r.
-				#Extract the text content from the incomming sms message.
-				#
-				m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
-				if m:
-					print "we just matched the regex " + locker.name + " : " + m.groups()[0]
-					user_text_input = m.groups()[0]
-					#Does the user input match the name of a locker to be checked out.
-					#Match case-insensitively the name of the locker to the text message.
-					if user_text_input.lower() == locker.name.lower():
-						print "our name match: " + user_text_input + " " + locker.name
-						#Check if the user has any other lockers checked out in this cluster.
-						if main_lockers.user_has_locker_checkedout(sms.phone):
-							#block them from checking out
-							message = "You already have a locker checked out. This locker cluster does not allow multiple lockers to be checked out by the same number."
-							tx.send_text(sms.phone, message)
-							tx.send_text_to_host(locker.host_number, sms.phone, message)
-						#User is good to check this locker out, so checkout the locker.
-						else:
-							print "we're trying to check out the locker"
-							main_lockers.remove_locker(locker)
-							locker.checkout_locker(sms.phone)
-							main_lockers.add_locker(locker)
-							main_lockers.save_lockers_to_json_file()
-							message = "Congratulations! You have successfully checked out " + locker.name + ". To open this locker, use the combination: " + locker.combo + ". This locker must be emptied by " + locker.due_date + "."
-							#If renewals are possible, let user know.
-							if locker.total_renewals_possible > 0:
-								message = message + "\n\nThe checkout period for this locker may be renewed up to " + locker.total_renewals_possible + "times."
-							message = "a simple message"
-							print "We're planning on sending the message: ~" + message + "~"
-							tx.send_text(sms.phone, message)
-							tx.send_text_to_host(locker.host_number, sms.phone, message)
-							print "We've hopefully just sent that message"
+	print "received sms message: ~" + sms.message + "~" #debugging
+	for locker in main_lockers.lockers:
+		#In order for the (\b) to work we needed the r.
+		#Extract the text content from the incomming sms message.
+		#
+		m = re.search(r'^\s*\b(.+)\b\s*$', sms.message)
+		if m:
+			print "we just matched the regex " + locker.name + " : " + m.groups()[0]
+			user_text_input = m.groups()[0]
+			#Does the user input match the name of a locker to be checked out.
+			#Match case-insensitively the name of the locker to the text message.
+			if user_text_input.lower() == locker.name.lower():
+				print "our name match: " + user_text_input + " " + locker.name
+				#Check if the user has any other lockers checked out in this cluster.
+				if main_lockers.user_has_locker_checkedout(sms.phone):
+					#block them from checking out
+					message = "You already have a locker checked out. This locker cluster does not allow multiple lockers to be checked out by the same number."
+					tx.send_text(sms.phone, message)
+					tx.send_text_to_host(locker.host_number, sms.phone, message)
+				#User is good to check this locker out, so checkout the locker.
 				else:
-					print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
+					print "we're trying to check out the locker"
+					main_lockers.remove_locker(locker)
+					locker.checkout_locker(sms.phone)
+					main_lockers.add_locker(locker)
+					main_lockers.save_lockers_to_json_file()
+					message = "Congratulations! You have successfully checked out " + locker.name + ". To open this locker, use the combination: " + locker.combo + ". This locker must be emptied by " + locker.due_date + "."
+					#If renewals are possible, let user know.
+					if locker.total_renewals_possible > 0:
+						message = message + "\n\nThe checkout period for this locker may be renewed up to " + locker.total_renewals_possible + "times."
+					message = "a simple message"
+					print "We're planning on sending the message: ~" + message + "~"
+					tx.send_text(sms.phone, message)
+					tx.send_text_to_host(locker.host_number, sms.phone, message)
+					print "We've hopefully just sent that message"
+		else:
+			print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
 	time.sleep(15)
 	
 
