@@ -89,21 +89,20 @@ def handleSms(incoming_sms):
 					print "We've hopefully just sent that message"
 		else:
 			print "Text message didn't have any content? See for yourself: ~" + sms.message + "~"
-	time.sleep(15)
 	
 
-#check for incoming sms messages
-
-#act on that sms message smartly
-#	Decode?
-
-#save the sms
-
-#perform some logic
 
 
-#check out is ok
-							
+#Need timer to track checkout period for each locker.
+#Current idea is to calculate and save the epoch date to each locker object that is checked out.
+#	In a non-blocking loop check each locker for end date epoch (datetime) entries
+#		Check the difference between now and the end date <= 48 hours (or whatever)
+#		Set has_48hours_elapsed flag or something so it doesn't keep spamming messages.
+#		Wait (sleep?) in a non-blocking manner.
+
+
+
+
 #Notes for next time:
 #Check-out locker
 #Send text to checker-outer that locker is checked out and give them combo, and let them know the due date.
