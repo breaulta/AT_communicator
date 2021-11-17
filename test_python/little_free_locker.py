@@ -28,11 +28,17 @@ class Lockers:
 		for locker in self.lockers:
 			print locker.name
 
+	def get_locker_list(self):
+		locker_list = []
+		for locker in self.lockers:
+			locker_list.append(locker.name)
+		return locker_list
+
 	def get_locker_obj_given_locker_name(self, locker_name):
 		for locker in self.lockers:
 			if locker_name == locker.name:
 				return locker
-		print "The locker with name " + locker_name + "was not found."
+		print "The locker with name " + locker_name + " was not found."
 
 	def does_locker_name_exist(self, name):
 		for locker in self.lockers:
