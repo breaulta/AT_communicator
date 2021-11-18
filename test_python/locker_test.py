@@ -43,16 +43,16 @@ while 1:
 	now = datetime.now() #keep calculating
 	bank = main_lockers.get_locker_list() #from main.pl initialization
 	for lockername in bank:
-		obj = locker_bank.get_locker_obj_given_locker_name( lockername )
-		duedate = obj.deserialize_date( obj.due_date )
+		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
+		duedate = locker_obj.deserialize_date( locker_obj.due_date )
 		diff = duedate - now
 		seconds = diff.total_seconds()
 		hours = seconds / 3600
 		print hours #debug
-		#48 hours left check
-		if hours <= 24:
+		#renew hours left check
+		if hours <= 24 and locker_obj.24hourflag = 1:
 			print "24 hour message"
-		elif hours <= 48:
+		elif hours <= 48 and locker_obj.48hourflag = 1:
 			print "48 hour message"
 		else:
 			print "not due"
