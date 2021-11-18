@@ -189,10 +189,10 @@ class Locker:
 			self.renewals_used = kwargs['renewals_used']
 		else:
 			self.renewals_used = "0"
-		if '24hourflag' in kwargs:
-			self.24hourflag = kwargs['24hourflag']
-		if '48hourflag' in kwargs:
-			self.48hourflag = kwargs['48hourflag']
+		if 'onedayflag' in kwargs:
+			self.onedayflag= kwargs['onedayflag']
+		if 'twodayflag' in kwargs:
+			self.twodayflag= kwargs['twodayflag']
 		
 	
 	#Stringify a datetime object for storage in a json file.
@@ -224,6 +224,9 @@ class Locker:
 			#record tenant number
 			self.tenant_number = tenant_number
 			self.renewals_used = '0'
+			#set renewal flags
+			self.onedayflag = 1
+			self.twodayflag = 1
 
 	def is_locker_checked_out(self):
 		if hasattr(self, "due_date"):
