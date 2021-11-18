@@ -16,12 +16,12 @@ locker_bank = Lockers()
 locker_bank.load_lockers_from_user_input_txt_file("template.txt")
 
 #Test Inputs here
-incoming_sms = "list lockers"
-incoming_sms = "checkout"
+#incoming_sms = "list lockers"
+#incoming_sms = "checkout"
 incoming_sms = "help"
-incoming_sms = "renew"
-incoming_sms = "Nala"
-incoming_sms = "he lp"
+#incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
+#incoming_sms = "Nala"
+#incoming_sms = "he lp"
 
 
 
@@ -33,7 +33,19 @@ commands.append('checkout')	#in the form of 'checkout <lockername>'
 commands.append('renew')	#target locker based on origin number
 
 
-for command in commands:
+found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
+for word in found:
+	print word
+
+if len(found) > 1:
+	print('too many commands!')
+if len(found) == 1:
+	print('found command ' + found[0] + '!')
+if len(found) < 1:
+	print("didn't find command!")
+
+
+
 
 
 
