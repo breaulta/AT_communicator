@@ -40,6 +40,14 @@ class Lockers:
 				return locker
 		print "The locker with name " + locker_name + " was not found."
 
+	def get_locker_obj_given_locker_number(self, locker_number):
+		for locker in self.lockers:
+			if hasattr(locker, "tenant_number"):
+				#print locker.tenant_number + " obj"
+				if locker_number == locker.tenant_number:
+					return locker
+		print "The locker with number " + locker_number  + " was not found."
+
 	def does_locker_name_exist(self, name):
 		for locker in self.lockers:
 			if name == locker.name:
@@ -248,11 +256,9 @@ class Locker:
 		#Ensure that locker is checked out.
 		if not self.is_locker_checked_out():
 			raise Exception("Can't renew locker " + self.name + ", it's not checked out!")
-
 		#Ensure that we have renewals remaining
 		if int (self.renewals_used) >= int(self.total_renewals_possible):
 			raise Exception("Can't renew locker " + self.name + ", all renewals have already been used!")
-
 		#Calculate new due date
 		now = datetime.now()
 		delta = timedelta(days=int(self.checkout_time_length))
@@ -261,4 +267,21 @@ class Locker:
 		self.due_date = self.serialize_date(due_date)
 		#Increment renewals used up.
 		self.renewals_used = str( int(self.renewals_used) + 1 )
+
+	def get_renewals_left(self):
+		return int(self.total_renewals_possible) - int(self.renewals_used)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
