@@ -162,45 +162,21 @@ class Lockers:
 
 #kwargs will hold locker attributes and values.
 class Locker:
-	def __init__(self, **kwargs):
-		if 'name' in kwargs:
-			self.name = kwargs['name']
-		else:
-			raise Exception ("The locker needs a name.")
-		if 'combo' in kwargs:
-			self.combo = kwargs['combo']
-		else:
-			raise Exception ("The locker needs a combo.")
-		if 'address' in kwargs:
-			self.address = kwargs['address']
-		else:
-			raise Exception ("The locker needs an address.")
-		if 'host_number' in kwargs:
-			self.host_number = kwargs['host_number']
-		else:
-			raise Exception ("The locker needs a contact number for the host.")
-		if 'checkout_time_length' in kwargs:
-			self.checkout_time_length = kwargs['checkout_time_length']
-		else:
-			raise Exception ("The locker needs to know how long to be active per user session.")
-		if 'start_date' in kwargs:
-			self.start_date = kwargs['start_date']
-		if 'due_date' in kwargs:
-			self.due_date = kwargs['due_date']
-		if 'tenant_number' in kwargs:
-			self.tenant_number = kwargs['tenant_number']
-		if 'total_renewals_possible' in kwargs:
-			self.total_renewals_possible = kwargs['total_renewals_possible']
-		else:
-			self.total_renewals_possible = "0"
-		if 'renewals_used' in kwargs:
-			self.renewals_used = kwargs['renewals_used']
-		else:
-			self.renewals_used = "0"
-		if 'onedayflag' in kwargs:
-			self.onedayflag= kwargs['onedayflag']
-		if 'twodayflag' in kwargs:
-			self.twodayflag= kwargs['twodayflag']
+	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
+				 start_date=None, due_date=None, tenant_nubmer=None, renewals_used='0', onedayflag=None,
+				 twodayflag=None):
+		self.name = name
+		self.combo = combo
+		self.address = address
+		self.host_number = host_number
+		self.checkout_time_length = checkout_time_length
+		self.total_renewals_possible = total_renewals_possible
+		self.start_date = start_date
+		self.due_date = due_date
+		self.tenant_nubmer = tenant_nubmer
+		self.renewals_used = renewals_used  # You could probably change this to just an int, instead of casting it
+		self.onedayflag = onedayflag
+		self.twodayflag = twodayflag
 		
 	
 	#Stringify a datetime object for storage in a json file.
@@ -226,13 +202,13 @@ class Locker:
 			now = datetime.now()
 			delta = timedelta(days=int(self.checkout_time_length))
 			due_date = now + delta
-			#Serialize datetime object.
+			# Serialize datetime object.
 			self.due_date = self.serialize_date(due_date)
 			self.start_date = self.serialize_date(now)
-			#record tenant number
+			# record tenant number
 			self.tenant_number = tenant_number
 			self.renewals_used = '0'
-			#set renewal flags
+			# set renewal flags
 			self.onedayflag = 1
 			self.twodayflag = 1
 
@@ -253,20 +229,20 @@ class Locker:
 			self.renewals_used = '0'
 		
 	def renew_locker(self):
-		#Ensure that locker is checked out.
+		# Ensure that locker is checked out.
 		if not self.is_locker_checked_out():
 			raise Exception("Can't renew locker " + self.name + ", it's not checked out!")
-		#Ensure that we have renewals remaining
-		if int (self.renewals_used) >= int(self.total_renewals_possible):
+		# Ensure that we have renewals remaining
+		if int(self.renewals_used) >= int(self.total_renewals_possible):
 			raise Exception("Can't renew locker " + self.name + ", all renewals have already been used!")
-		#Calculate new due date
+		# Calculate new due date
 		now = datetime.now()
 		delta = timedelta(days=int(self.checkout_time_length))
-		due_date = now + delta
-		#Serialize datetime object.
+		due_date = now + delta  # lsldhfslh
+		# Serialize datetime object.
 		self.due_date = self.serialize_date(due_date)
-		#Increment renewals used up.
-		self.renewals_used = str( int(self.renewals_used) + 1 )
+		# Increment renewals used up.
+		self.renewals_used = str(int(self.renewals_used) + 1)  # TODO here can change when you cast renewals_used to int
 
 	def get_renewals_left(self):
 		return int(self.total_renewals_possible) - int(self.renewals_used)
