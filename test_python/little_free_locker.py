@@ -213,11 +213,13 @@ class Locker:
 			self.twodayflag = 1
 
 	def is_locker_checked_out(self):
-		if hasattr(self, "due_date"):
+#		if hasattr(self, "due_date"):
+		if self.due_date == 'None':
+			print 'inside is_locker_checked_out'
 			#Is checked out
-			return 1
-		else:
 			return 0
+		else:
+			return 1
 	
 	def freeup_locker(self):
 		if not self.is_locker_checked_out():

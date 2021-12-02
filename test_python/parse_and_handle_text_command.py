@@ -38,6 +38,7 @@ incoming_sms = "renew"
 
 incoming_number = "53"
 locker = locker_bank.get_locker_obj_given_locker_name("Nala")
+print locker.due_date + 'something'
 locker.checkout_locker(incoming_number)
 print locker.tenant_number
 lockerx = locker_bank.get_locker_obj_given_locker_number("53")
