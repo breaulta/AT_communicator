@@ -154,7 +154,7 @@ class Lockers:
 
 	def user_has_locker_checkedout (self, number):
 		for locker in self.lockers:
-			if hasattr(locker, "tenant_number"):
+			if hasattr(locker, "tenant_number"): # Why does hasattr work here but not for due_date?
 				if locker.tenant_number == number:
 					return 1
 		return 0
@@ -163,7 +163,7 @@ class Lockers:
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
-				 start_date=None, due_date=None, tenant_nubmer=None, renewals_used='0', onedayflag=None,
+				 start_date=None, due_date=None, tenant_nubmer=None, renewals_used=0, onedayflag=None,
 				 twodayflag=None):
 		self.name = name
 		self.combo = combo
@@ -207,7 +207,7 @@ class Locker:
 			self.start_date = self.serialize_date(now)
 			# record tenant number
 			self.tenant_number = tenant_number
-			self.renewals_used = '0'
+			self.renewals_used = 0
 			# set renewal flags
 			self.onedayflag = 1
 			self.twodayflag = 1
@@ -228,14 +228,14 @@ class Locker:
 			delattr(self, "due_date")
 			delattr(self, "tenant_number")
 			delattr(self, "start_date")
-			self.renewals_used = '0'
+			self.renewals_used = 0
 		
 	def renew_locker(self):
 		# Ensure that locker is checked out.
 		if not self.is_locker_checked_out():
 			raise Exception("Can't renew locker " + self.name + ", it's not checked out!")
 		# Ensure that we have renewals remaining
-		if int(self.renewals_used) >= int(self.total_renewals_possible):
+		if self.renewals_used >= int(self.total_renewals_possible):
 			raise Exception("Can't renew locker " + self.name + ", all renewals have already been used!")
 		# Calculate new due date
 		now = datetime.now()
@@ -244,10 +244,10 @@ class Locker:
 		# Serialize datetime object.
 		self.due_date = self.serialize_date(due_date)
 		# Increment renewals used up.
-		self.renewals_used = str(int(self.renewals_used) + 1)  # TODO here can change when you cast renewals_used to int
+		self.renewals_used = self.renewals_used + 1
 
 	def get_renewals_left(self):
-		return int(self.total_renewals_possible) - int(self.renewals_used)
+		return int(self.total_renewals_possible) - self.renewals_used
 
 
 

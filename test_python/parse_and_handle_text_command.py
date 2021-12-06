@@ -57,7 +57,7 @@ found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
 for word in found:
 	print word
 
-#only 1 command is valid
+# only 1 command is valid
 if len(found) > 1:
 	print(error_toomany_message)
 elif len(found) < 1:
@@ -78,14 +78,16 @@ elif len(found) == 1:
 				print no_renewals_left_msg + " Your locker due date is " + locker.due_date
 			else:
 				locker.renew_locker
+				print "send text informing host of renewal"
 				print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(renewals_left) + " renewals left."
 		else:
 			print locker_not_checked_out_msg
 	elif command == 'checkout':
-		#print checkout_message
+		# print checkout_message
 		print "debug/log: do some checkout logic, checkout the locker, set timers, etc."
 		lockernames = locker_bank.get_locker_list()
 		foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
+		# Debug
 		for name in foundnames:
 			print name
 		if len(foundnames) > 1:
