@@ -158,7 +158,12 @@ class Lockers:
 				if locker.tenant_number == number:
 					return 1
 		return 0
-				
+
+	def is_locker_cluster_full (self):
+		for locker in self.lockers:
+			if locker.due_date == 'None':
+				return 0
+		return 1		
 
 #kwargs will hold locker attributes and values.
 class Locker:

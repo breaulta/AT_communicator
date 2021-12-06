@@ -25,6 +25,7 @@ error_toofew_names = "You didn't appear to correctly input the name of the locke
 no_renewals_left_msg = "Sorry, there are no renewals left for this checkout period."
 locker_renewed_msg = "Your locker has been renewed."
 locker_not_checked_out_msg = "No locker has been checked out with the number you're texting from."
+locker_cluster_full_msg = "This locker cluster is full. The next possible opening is: "
 
 #Test Inputs here
 #incoming_sms = "list lockers"
@@ -43,7 +44,6 @@ locker.checkout_locker(incoming_number)
 print locker.tenant_number
 lockerx = locker_bank.get_locker_obj_given_locker_number("53")
 print lockerx.tenant_number
-
 
 #parse incoming sms
 commands = []
@@ -97,6 +97,9 @@ elif len(found) == 1:
 		elif len(foundnames) == 1:
 			print('found lockername ' + foundnames[0] + '!')
 			print "debug/log: checkout the locker."
+			if locker_bank.is_locker_cluster_full():
+				print locker_cluster_full_msg # + computed earliest possible release date
+			
 
 
 
