@@ -40,24 +40,30 @@ incoming_sms = "renew"
 incoming_number = "53"
 locker = locker_bank.get_locker_obj_given_locker_name("Nala")
 print locker.due_date + 'something'
-locker.checkout_locker(incoming_number)
+#locker._checkout_locker(incoming_number)
+locker_bank.checkout_locker(incoming_number, 'Nala')
 locker.due_date = '12/9/2021'
 print locker.tenant_number
 lockerx = locker_bank.get_locker_obj_given_locker_number("53")
 print lockerx.tenant_number
 
 lockery = locker_bank.get_locker_obj_given_locker_name("3rd")
-lockery.checkout_locker('555-555-5555')	# Shouldn't be able to checkout with same number!
+#lockery._checkout_locker('555-555-5555')	# Shouldn't be able to checkout with same number!
+locker_bank.checkout_locker('555-555-5555', '3rd')
 lockery.due_date = '12/18/2021'
-lockery = locker_bank.get_locker_obj_given_locker_name("Lenron")
-lockery.checkout_locker('555-555-5555')
-lockery.due_date = '12/8/2021'
+lockerz = locker_bank.get_locker_obj_given_locker_name("Lenron")
+#lockerz._checkout_locker('555-555-5555')
+if locker_bank.checkout_locker('555-555-5555', 'Lenron'):
+	print 'checkedout'
+else:
+	print 'no checkout'
+lockerz.due_date = '12/8/2021'
 print locker_bank.earliest_possible_release()
 
 
 
-
 exit(0)
+
 
 #parse incoming sms
 commands = []
@@ -97,22 +103,21 @@ elif len(found) == 1:
 		else:
 			print locker_not_checked_out_msg
 	elif command == 'checkout':
-		# print checkout_message
-		print "debug/log: do some checkout logic, checkout the locker, set timers, etc."
-		lockernames = locker_bank.get_locker_list()
-		foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
-		# Debug
-		for name in foundnames:
-			print name
-		if len(foundnames) > 1:
-			print(error_toomany_names)
-		elif len(foundnames) < 1:
-			print(error_toofew_names)
-		elif len(foundnames) == 1:
-			print('found lockername ' + foundnames[0] + '!')
-			print "debug/log: checkout the locker."
-			if locker_bank.is_locker_cluster_full():
-				print locker_cluster_full_msg # + computed earliest possible release date
+		if locker_bank.is_locker_cluster_full():
+			print locker_cluster_full_msg + locker_bank.earliest_possible_release()
+		else:
+			lockernames = locker_bank.get_locker_list()
+			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
+			for name in foundnames:	#Debug
+				print name
+			if len(foundnames) > 1:
+				print(error_toomany_names)
+			elif len(foundnames) < 1:
+				print(error_toofew_names)
+			elif len(foundnames) == 1:
+				print('found lockername ' + foundnames[0] + '!') # Debug
+				lockername = foundnames[0]
+				print 'try to checkout: ' + lockername	# Debug
 			
 
 

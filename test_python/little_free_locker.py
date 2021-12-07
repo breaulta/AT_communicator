@@ -180,6 +180,19 @@ class Lockers:
 					earliest = trynext
 		return earliest
 
+	# This limits the number of lockers a tenant can checkout at one time to 1.
+	# True/false returns are for tenant notification messages.
+	def checkout_locker(self, number, lockername):
+		for locker in self.lockers:
+			if hasattr(locker, 'tenant_number'):
+				print 'tenant_number: ' + locker.tenant_number
+				if locker.tenant_number == number:
+					print 'how'
+					return 0
+		locker = self.get_locker_obj_given_locker_name(lockername)
+		locker._checkout_locker(number)
+		return 1
+
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
@@ -194,7 +207,7 @@ class Locker:
 		self.start_date = start_date
 		self.due_date = due_date
 		self.tenant_nubmer = tenant_nubmer
-		self.renewals_used = renewals_used  # You could probably change this to just an int, instead of casting it
+		self.renewals_used = renewals_used
 		self.onedayflag = onedayflag
 		self.twodayflag = twodayflag
 		
@@ -215,7 +228,7 @@ class Locker:
 		else:
 			raise Exception("Improperly stored date: ~" + self.due_date + "~")
 
-	def checkout_locker(self, tenant_number):
+	def _checkout_locker(self, tenant_number):
 		if self.is_locker_checked_out():
 			raise Exception("Can't double check out locker!")
 		else:
