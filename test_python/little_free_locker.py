@@ -163,7 +163,22 @@ class Lockers:
 		for locker in self.lockers:
 			if locker.due_date == 'None':
 				return 0
-		return 1		
+		return 1
+
+	def earliest_possible_release (self):
+		# Pick a date far in the future
+		earliest = datetime(year=2100 , month=1, day=1)
+		for locker in self.lockers:
+			if locker.due_date == 'None':
+				return 'Now.'
+			else:
+				trynext = locker.deserialize_date()
+				diff = earliest - trynext
+				seconds = diff.total_seconds()
+				print 'secs: ' + str(seconds)
+				if seconds >= 0: # 
+					earliest = trynext
+		return earliest
 
 #kwargs will hold locker attributes and values.
 class Locker:
@@ -190,15 +205,15 @@ class Locker:
 		return serialized_date
 
 	#Return a datetime object from our json file.
-	def deserialize_date(self, serialized_date):
-		match_date = re.search('^(\d+)/(\d+)/(\d+)$', serialized_date)
+	def deserialize_date(self):
+		match_date = re.search('^(\d+)/(\d+)/(\d+)$', self.due_date)
 		if match_date:
 			month = int(match_date.groups()[0])
 			day = int(match_date.groups()[1])
 			year = int(match_date.groups()[2])
 			return datetime(year=year, month=month, day=day)
 		else:
-			raise Exception("Improperly stored date: ~" + serialized_date + "~")
+			raise Exception("Improperly stored date: ~" + self.due_date + "~")
 
 	def checkout_locker(self, tenant_number):
 		if self.is_locker_checked_out():

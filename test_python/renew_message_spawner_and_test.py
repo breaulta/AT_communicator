@@ -49,7 +49,7 @@ while 1:
 	for lockername in bank:
 		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
 		if hasattr(locker_obj, 'due_date'):
-			duedate = locker_obj.deserialize_date( locker_obj.due_date )
+			duedate = locker_obj.deserialize_date()
 			diff = duedate - now
 			seconds = diff.total_seconds()
 			hours = seconds / 3600

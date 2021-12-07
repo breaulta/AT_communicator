@@ -41,9 +41,23 @@ incoming_number = "53"
 locker = locker_bank.get_locker_obj_given_locker_name("Nala")
 print locker.due_date + 'something'
 locker.checkout_locker(incoming_number)
+locker.due_date = '12/9/2021'
 print locker.tenant_number
 lockerx = locker_bank.get_locker_obj_given_locker_number("53")
 print lockerx.tenant_number
+
+lockery = locker_bank.get_locker_obj_given_locker_name("3rd")
+lockery.checkout_locker('555-555-5555')	# Shouldn't be able to checkout with same number!
+lockery.due_date = '12/18/2021'
+lockery = locker_bank.get_locker_obj_given_locker_name("Lenron")
+lockery.checkout_locker('555-555-5555')
+lockery.due_date = '12/8/2021'
+print locker_bank.earliest_possible_release()
+
+
+
+
+exit(0)
 
 #parse incoming sms
 commands = []
