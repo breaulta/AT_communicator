@@ -62,7 +62,7 @@ print locker_bank.earliest_possible_release()
 
 
 
-exit(0)
+#exit(0)
 
 
 #parse incoming sms
@@ -103,6 +103,7 @@ elif len(found) == 1:
 		else:
 			print locker_not_checked_out_msg
 	elif command == 'checkout':
+		# Inform potential tenant of the earliest they could checkout a locker.
 		if locker_bank.is_locker_cluster_full():
 			print locker_cluster_full_msg + locker_bank.earliest_possible_release()
 		else:
@@ -118,6 +119,7 @@ elif len(found) == 1:
 				print('found lockername ' + foundnames[0] + '!') # Debug
 				lockername = foundnames[0]
 				print 'try to checkout: ' + lockername	# Debug
+				# 
 			
 
 
