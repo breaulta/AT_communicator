@@ -35,14 +35,14 @@ locker_cluster_full_msg = "This locker cluster is full. The next possible openin
 #incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
 #incoming_sms = "Nala"
 #incoming_sms = "he lp"
-incoming_sms = "renew"
+incoming_sms = "checkout Nala"	# Test checkout bloc
 
 incoming_number = "53"
-locker = locker_bank.get_locker_obj_given_locker_name("Nala")
-print locker.due_date + 'something'
+#locker = locker_bank.get_locker_obj_given_locker_name("Nala")
+#print locker.due_date + 'something'
 #locker._checkout_locker(incoming_number)
-#locker_bank.checkout_locker(incoming_number, 'Nala')
-locker.due_date = '12/9/2021'
+locker_bank.checkout_locker('fake number', 'Nala')
+#locker.due_date = '12/9/2021'
 #print locker.tenant_number
 #lockerx = locker_bank.get_locker_obj_given_locker_number("53")
 #print lockerx.tenant_number
@@ -61,9 +61,6 @@ else:
 print locker_bank.earliest_possible_release()
 
 print locker_bank.list_available_lockers()
-
-
-exit(0)
 
 
 #parse incoming sms
@@ -127,8 +124,7 @@ elif len(found) == 1:
 				else:
 					# There is at least one locker or
 					# locker_bank.is_locker_cluster_full would prevent getting here.
-					print 'no checkout'
-					# list_available_lockers()
+					print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
 
 
 

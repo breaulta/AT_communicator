@@ -190,7 +190,10 @@ class Lockers:
 					print 'how'
 					return 0
 		locker = self.get_locker_obj_given_locker_name(lockername)
-		locker._checkout_locker(number)
+		if locker._checkout_locker_try(number):
+			# Locker checkedout
+		else:
+			# Exception would have triggered.
 		return 1
 
 	def list_available_lockers(self):
@@ -237,9 +240,10 @@ class Locker:
 		else:
 			raise Exception("Improperly stored date: ~" + self.due_date + "~")
 
-	def _checkout_locker(self, tenant_number):
+	def _checkout_locker_try(self, tenant_number):
 		if self.is_locker_checked_out():
-			raise Exception("Can't double check out locker!")
+			# raise Exception("Can't double check out locker!")
+			return 0
 		else:
 			now = datetime.now()
 			delta = timedelta(days=int(self.checkout_time_length))
@@ -253,6 +257,7 @@ class Locker:
 			# set renewal flags
 			self.onedayflag = 1
 			self.twodayflag = 1
+			return 1
 
 	def is_locker_checked_out(self):
 #		if hasattr(self, "due_date"):
