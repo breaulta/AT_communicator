@@ -41,28 +41,29 @@ incoming_number = "53"
 locker = locker_bank.get_locker_obj_given_locker_name("Nala")
 print locker.due_date + 'something'
 #locker._checkout_locker(incoming_number)
-locker_bank.checkout_locker(incoming_number, 'Nala')
+#locker_bank.checkout_locker(incoming_number, 'Nala')
 locker.due_date = '12/9/2021'
-print locker.tenant_number
-lockerx = locker_bank.get_locker_obj_given_locker_number("53")
-print lockerx.tenant_number
+#print locker.tenant_number
+#lockerx = locker_bank.get_locker_obj_given_locker_number("53")
+#print lockerx.tenant_number
 
-lockery = locker_bank.get_locker_obj_given_locker_name("3rd")
+#lockery = locker_bank.get_locker_obj_given_locker_name("3rd")
 #lockery._checkout_locker('555-555-5555')	# Shouldn't be able to checkout with same number!
-locker_bank.checkout_locker('555-555-5555', '3rd')
-lockery.due_date = '12/18/2021'
-lockerz = locker_bank.get_locker_obj_given_locker_name("Lenron")
+#locker_bank.checkout_locker('555-555-5555', '3rd')
+#lockery.due_date = '12/18/2021'
+#lockerz = locker_bank.get_locker_obj_given_locker_name("Lenron")
 #lockerz._checkout_locker('555-555-5555')
 if locker_bank.checkout_locker('555-555-5555', 'Lenron'):
 	print 'checkedout'
 else:
 	print 'no checkout'
-lockerz.due_date = '12/8/2021'
+#lockerz.due_date = '12/8/2021'
 print locker_bank.earliest_possible_release()
 
+print locker_bank.list_available_lockers()
 
 
-#exit(0)
+exit(0)
 
 
 #parse incoming sms
@@ -77,6 +78,7 @@ found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
 for word in found:
 	print word
 
+sms_origin_number = '192.168.1.1'
 # only 1 command is valid
 if len(found) > 1:
 	print(error_toomany_message)
@@ -119,8 +121,14 @@ elif len(found) == 1:
 				print('found lockername ' + foundnames[0] + '!') # Debug
 				lockername = foundnames[0]
 				print 'try to checkout: ' + lockername	# Debug
-				# 
-			
+				# try to checkout, give list of available otherwise
+				if locker_bank.checkout_locker(sms_origin_number, lockername):
+					print 'checkedout'
+				else:
+					# There is at least one locker or
+					# locker_bank.is_locker_cluster_full would prevent getting here.
+					print 'no checkout'
+					# list_available_lockers()
 
 
 

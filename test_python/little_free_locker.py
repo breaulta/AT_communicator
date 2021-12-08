@@ -193,6 +193,15 @@ class Lockers:
 		locker._checkout_locker(number)
 		return 1
 
+	def list_available_lockers(self):
+		available = ''
+		for locker in self.lockers:
+			if hasattr(locker, 'tenant_number'):
+				continue
+			else:
+				available += locker.name + ' '
+		return available
+
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
