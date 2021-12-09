@@ -16,8 +16,8 @@ locker_bank = Lockers()
 locker_bank.load_lockers_from_user_input_txt_file("template.txt")
 
 help_message = "In order to checkout a locker, text this number 'checkout <name_of_locker>'. Command words are 'help' 'renew' 'checkout'. The list of available lockers are as follows: "
-error_toomany_message = "Sorry, that was too many command words. Command words are 'help' 'renew' 'checkout. " + help_message
-error_toofew_message = "Sorry, that was too few command words. Command words are 'help' 'renew' 'checkout. " + help_message
+error_toomany_message = "Sorry, that was too many command words. " + help_message
+error_toofew_message = "Sorry, that was too few command words. " + help_message
 error_generic_message= "Sorry, I did not understand that. " + help_message
 checkout_message = "Congratulations! You have successfully checked out (locker.name). To open this locker, use the combination: (locker.combo) . This locker must be emptied by (locker.due_date)."
 error_toomany_names = "There were too many matched lockernames in your command. You cannot checkout multiple lockers. Please reply with exactly one lockername in order to checkout that locker." + help_message
@@ -31,13 +31,14 @@ locker_cluster_full_msg = "This locker cluster is full. The next possible openin
 #incoming_sms = "list lockers"
 #incoming_sms = "checkout"
 #incoming_sms = "checkout Nala"
-incoming_sms = "help"
+#incoming_sms = "help"
 #incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
 #incoming_sms = "Nala"
 #incoming_sms = "he lp"
 #incoming_sms = "checkout Nala"	# Test checkout bloc
+incoming_sms = "renew"
 
-incoming_number = "53"
+incoming_number = "fake number"
 #locker = locker_bank.get_locker_obj_given_locker_name("Nala")
 #print locker.due_date + 'something'
 #locker._checkout_locker(incoming_number)
@@ -71,9 +72,6 @@ commands.append('renew')	#target locker based on origin number
 
 #find all matches of the words in commands in the string incoming_sms
 found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
-#debugging
-for word in found:
-	print word
 
 sms_origin_number = '192.168.1.1'
 # only 1 command is valid
@@ -108,23 +106,23 @@ elif len(found) == 1:
 		else:
 			lockernames = locker_bank.get_locker_list()
 			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
-			for name in foundnames:	#Debug
-				print name
 			if len(foundnames) > 1:
 				print(error_toomany_names)
 			elif len(foundnames) < 1:
 				print(error_toofew_names)
 			elif len(foundnames) == 1:
-				print('found lockername ' + foundnames[0] + '!') # Debug
+#				print('found lockername ' + foundnames[0] + '!') # Debug
 				lockername = foundnames[0]
 				print 'try to checkout: ' + lockername	# Debug
 				# try to checkout, give list of available otherwise
 				if locker_bank.checkout_locker(sms_origin_number, lockername):
-					print 'checkedout'
+					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
+					print "You have successfully checked out locker '" + lockername + "'. The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
 				else:
 					# There is at least one locker or
 					# locker_bank.is_locker_cluster_full would prevent getting here.
-					print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
+					#print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
+					print "The locker " + lockername + " could not be checked out at this time. However, other lockers are available: " + locker_bank.list_available_lockers()
 
 
 

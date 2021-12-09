@@ -178,7 +178,7 @@ class Lockers:
 				print 'secs: ' + str(seconds)
 				if seconds >= 0: # 
 					earliest = trynext
-		return earliest
+		return str(earliest)
 
 	# This limits the number of lockers a tenant can checkout at one time to 1.
 	# True/false returns are for tenant notification messages.
@@ -205,7 +205,7 @@ class Lockers:
 			else:
 				available += locker.name + ' '
 		if available == '':
-			return 'No lockers available at this time. Earliest possible release: ' + str(self.earliest_possible_release())
+			return 'No lockers available at this time. Earliest possible release: ' + self.earliest_possible_release()
 		else:
 			return available
 
