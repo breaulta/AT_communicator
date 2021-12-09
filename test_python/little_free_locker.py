@@ -200,11 +200,14 @@ class Lockers:
 	def list_available_lockers(self):
 		available = ''
 		for locker in self.lockers:
-			if hasattr(locker, 'tenant_number'):
+			if hasattr(locker, 'tenant_number'):	# Locker is in use.
 				continue
 			else:
 				available += locker.name + ' '
-		return available
+		if available == '':
+			return 'No lockers available at this time. Earliest possible release: ' + str(self.earliest_possible_release())
+		else:
+			return available
 
 #kwargs will hold locker attributes and values.
 class Locker:

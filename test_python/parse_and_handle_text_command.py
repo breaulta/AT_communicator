@@ -15,7 +15,7 @@ from little_free_locker import Lockers
 locker_bank = Lockers()
 locker_bank.load_lockers_from_user_input_txt_file("template.txt")
 
-help_message = "In order to checkout a locker, text this number (locker_bank_number) 'checkout <name_of_locker>'. This list of lockers are as follows: (names_of_lockers). Command words are 'help' 'renew' 'checkout'."
+help_message = "In order to checkout a locker, text this number 'checkout <name_of_locker>'. Command words are 'help' 'renew' 'checkout'. The list of available lockers are as follows: "
 error_toomany_message = "Sorry, that was too many command words. Command words are 'help' 'renew' 'checkout. " + help_message
 error_toofew_message = "Sorry, that was too few command words. Command words are 'help' 'renew' 'checkout. " + help_message
 error_generic_message= "Sorry, I did not understand that. " + help_message
@@ -31,11 +31,11 @@ locker_cluster_full_msg = "This locker cluster is full. The next possible openin
 #incoming_sms = "list lockers"
 #incoming_sms = "checkout"
 #incoming_sms = "checkout Nala"
-#incoming_sms = "help"
+incoming_sms = "help"
 #incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
 #incoming_sms = "Nala"
 #incoming_sms = "he lp"
-incoming_sms = "checkout Nala"	# Test checkout bloc
+#incoming_sms = "checkout Nala"	# Test checkout bloc
 
 incoming_number = "53"
 #locker = locker_bank.get_locker_obj_given_locker_name("Nala")
@@ -49,7 +49,7 @@ locker_bank.checkout_locker('fake number', 'Nala')
 
 #lockery = locker_bank.get_locker_obj_given_locker_name("3rd")
 #lockery._checkout_locker('555-555-5555')	# Shouldn't be able to checkout with same number!
-#locker_bank.checkout_locker('555-555-5555', '3rd')
+locker_bank.checkout_locker('55-555-5555', '3rd')
 #lockery.due_date = '12/18/2021'
 #lockerz = locker_bank.get_locker_obj_given_locker_name("Lenron")
 #lockerz._checkout_locker('555-555-5555')
@@ -86,7 +86,7 @@ elif len(found) == 1:
 	command = found[0]
 	print command
 	if command == 'help':
-		print help_message
+		print help_message + locker_bank.list_available_lockers()
 	elif command == 'renew':
 		if locker_bank.user_has_locker_checkedout(incoming_number):
 			print incoming_number
