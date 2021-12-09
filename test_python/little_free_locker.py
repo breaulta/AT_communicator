@@ -192,9 +192,10 @@ class Lockers:
 		locker = self.get_locker_obj_given_locker_name(lockername)
 		if locker._checkout_locker_try(number):
 			# Locker checkedout
+			return 1
 		else:
 			# Exception would have triggered.
-		return 1
+			return 0
 
 	def list_available_lockers(self):
 		available = ''
@@ -242,7 +243,6 @@ class Locker:
 
 	def _checkout_locker_try(self, tenant_number):
 		if self.is_locker_checked_out():
-			# raise Exception("Can't double check out locker!")
 			return 0
 		else:
 			now = datetime.now()
