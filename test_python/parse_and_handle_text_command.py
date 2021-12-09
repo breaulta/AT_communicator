@@ -30,19 +30,19 @@ locker_cluster_full_msg = "This locker cluster is full. The next possible openin
 #Test Inputs here
 #incoming_sms = "list lockers"
 #incoming_sms = "checkout"
-#incoming_sms = "checkout Nala"
+incoming_sms = "checkout Nala"
 #incoming_sms = "help"
 #incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
 #incoming_sms = "Nala"
 #incoming_sms = "he lp"
 #incoming_sms = "checkout Nala"	# Test checkout bloc
-incoming_sms = "renew"
+#incoming_sms = "renew"
 
 incoming_number = "fake number"
 #locker = locker_bank.get_locker_obj_given_locker_name("Nala")
 #print locker.due_date + 'something'
 #locker._checkout_locker(incoming_number)
-locker_bank.checkout_locker('fake number', 'Nala')
+#locker_bank.checkout_locker('fake number', 'Nala')
 #locker.due_date = '12/9/2021'
 #print locker.tenant_number
 #lockerx = locker_bank.get_locker_obj_given_locker_number("53")
@@ -117,7 +117,7 @@ elif len(found) == 1:
 				# try to checkout, give list of available otherwise
 				if locker_bank.checkout_locker(sms_origin_number, lockername):
 					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
-					print "You have successfully checked out locker '" + lockername + "'. The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
+					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
 				else:
 					# There is at least one locker or
 					# locker_bank.is_locker_cluster_full would prevent getting here.

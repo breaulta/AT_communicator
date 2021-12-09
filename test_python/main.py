@@ -46,6 +46,10 @@ modem.smsTextMode = False
 modem.connect()
 #*TEST NEEDED*
 
+# Periodically save lockers to json file in case of crash
+#main_lockers.save_lockers_to_json_file()
+
+
 #Called when pgsmm detects an incoming text
 #sms attributes: number, text, smsc, time
 #*TEST NEEDED* to reveal the contents of the sms array
