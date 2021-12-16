@@ -5,6 +5,8 @@ import re
 import json
 import os
 from datetime import datetime, timedelta
+import logging
+mod_logger = logging.getLogger('test_logger_app.little_free')
 
 json_database = "locker_database.json"
 
@@ -13,6 +15,8 @@ json_database = "locker_database.json"
 class Lockers:
 	def __init__(self):
 		self.lockers = []
+		self.logger = logging.getLogger('test_logger_app.little_free.Lockers')
+		self.logger.info('creating locker bank')
 
 	def _add_locker(self, locker):
 		if self.does_locker_name_exist(locker.name):
@@ -60,6 +64,7 @@ class Lockers:
 		locker_to_json = {}
 		locker_to_json['lockers'] = []
 		for locker in self.lockers:
+			del locker.logger
 			locker_to_json['lockers'].append( vars(locker) ) #vars converts Locker object to dict
 		outfile = open(json_database, 'w')
 		json.dump(locker_to_json, outfile)
@@ -106,6 +111,7 @@ class Lockers:
 
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
+		self.logger.info('pulling data from template...')
 		#First run json_file_to_lockers_obj here, check for same locker names, and account for duplicates, to ensure that we're not creating duplicate lockers
 		self.json_file_to_lockers_obj()
 		#Hash to hold data gleaned from file for each locker.
@@ -154,6 +160,7 @@ class Lockers:
 		template_file.close()
 		#Write any changes to Lockers object to json database.
 		self.save_lockers_to_json_file()
+		self.logger.info('completed pulling data from template file')
 
 	def user_has_locker_checkedout (self, number):
 		for locker in self.lockers:
@@ -229,6 +236,9 @@ class Locker:
 		self.renewals_used = renewals_used
 		self.onedayflag = onedayflag
 		self.twodayflag = twodayflag
+		
+		self.logger = logging.getLogger('test_logger_app.little_free.Locker')
+		self.logger.info('creating locker')
 		
 	
 	#Stringify a datetime object for storage in a json file.
