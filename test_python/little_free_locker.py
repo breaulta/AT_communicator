@@ -14,13 +14,15 @@ class Lockers:
 	def __init__(self):
 		self.lockers = []
 
-	def add_locker(self, locker):
+	def _add_locker(self, locker):
 		if self.does_locker_name_exist(locker.name):
+			# Only used on startup
 			raise Exception("Can't double add locker " + locker.name)
 		self.lockers.append(locker)
 
-	def remove_locker(self, locker):
+	def _remove_locker(self, locker):
 		if not self.does_locker_name_exist(locker.name):
+			# Only used on startup
 			raise Exception("We can't remove locker " + locker.name + " because it's not in our Lockers object")
 		self.lockers.remove(locker)
 
@@ -84,7 +86,7 @@ class Lockers:
 			if self.does_locker_name_exist(new_locker_obj.name):
 				continue
 			#Add to Lockers list of lockers
-			self.add_locker(new_locker_obj)
+			self._add_locker(new_locker_obj)
 
 	#Update lockers retrieved from .json database with new attributes from template file.
 	def populate_locker_attributes_from_template(self, locker_data_from_template_file):
@@ -93,14 +95,14 @@ class Lockers:
 		if self.does_locker_name_exist(locker_name):
 			locker_obj = self.get_locker_obj_given_locker_name(locker_name)
 			#Remove the old version of the Locker object.
-			self.remove_locker(locker_obj)
+			self._remove_locker(locker_obj)
 			for attribute in locker_data_from_template_file:
 				setattr(locker_obj, attribute, locker_data_from_template_file[attribute])
 			#Add our new version of the Locker object back onto the Lockers object.
-			self.add_locker(locker_obj)
+			self._add_locker(locker_obj)
 		#If it doesn't exist, create it anew.
 		else:
-			self.add_locker( Locker(**locker_data_from_template_file) )
+			self._add_locker( Locker(**locker_data_from_template_file) )
 
 
 	def load_lockers_from_user_input_txt_file(self, locker_template_filename):
@@ -119,6 +121,7 @@ class Lockers:
 					locker_name = m.groups()[1]
 					#Check to make sure that two lockers with the same name don't appear in template file.
 					if locker_name in locker_names_in_template_file:
+						# Only used on startup
 						raise Exception("Locker name " + locker_name + " appears more than once in the file!")
 					else:
 						locker_names_in_template_file.append(locker_name) 
@@ -144,7 +147,7 @@ class Lockers:
 		#Remove any lockers not represented in the template file (master).
 		for locker in self.lockers:
 			if locker.name not in locker_names_in_template_file:
-				self.remove_locker(locker)
+				self._remove_locker(locker)
 		#Adding the last locker in the template file to our lockers object.
 		if locker_in_data:
 			self.populate_locker_attributes_from_template(locker_in_data)
