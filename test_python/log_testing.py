@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger('test_logger_app')
 logger.setLevel(logging.DEBUG)	# Set default level?
 # create file handler which logs even debug messages
-fh = logging.FileHandler('spam.log')
+fh = logging.FileHandler('locker.log')
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
