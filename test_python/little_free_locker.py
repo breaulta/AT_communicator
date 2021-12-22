@@ -219,6 +219,8 @@ class Lockers:
 		else:
 			return available
 
+	def freeup_locker(self, lockername):
+
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
@@ -284,7 +286,7 @@ class Locker:
 		else:
 			return 1
 	
-	def freeup_locker(self):
+	def freeup_locker(self):		### WE NEVER ACTUALLY ARE USING THIS -- should be handled in Lockers
 		if not self.is_locker_checked_out():
 			raise Exception("Locker " + self.name + " is already free!")
 		else:

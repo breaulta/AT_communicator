@@ -33,7 +33,10 @@ logger.info('create lockers object')
 locker_bank = Lockers()
 logger.info('load from template')
 locker_bank.load_lockers_from_user_input_txt_file("template.txt")
-logger.info('end')
+
+nala = locker_bank.get_locker_object_given_locker_name('Nala')
+nala.freeup_locker
+#logger.info('end')
 
 
 

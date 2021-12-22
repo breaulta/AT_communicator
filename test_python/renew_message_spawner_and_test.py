@@ -38,8 +38,9 @@ else:
 	print "not due"
 """
 
+#obj.checkout_locker("5039895540")
+main_lockers.checkout_locker('5039895540', 'Nala')
 obj = main_lockers.get_locker_obj_given_locker_name('Nala')
-obj.checkout_locker("5039895540")
 obj.due_date = '11/19/2021'
 
 #Spawn renewal messages
@@ -48,7 +49,8 @@ while 1:
 	bank = main_lockers.get_locker_list() #from main.pl initialization
 	for lockername in bank:
 		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
-		if hasattr(locker_obj, 'due_date'):
+		#if hasattr(locker_obj, 'due_date'):
+		if locker_obj.is_locker_checked_out():
 			duedate = locker_obj.deserialize_date()
 			diff = duedate - now
 			seconds = diff.total_seconds()
@@ -62,6 +64,10 @@ while 1:
 			elif hours <= 48 and locker_obj.twodayflag == 1:
 				locker_obj.twodayflag = 0
 				print "48 hour message"
+			elif hours <= 0 and locker_obj.is_locker_checked_out():
+				# Close tenancy of current locker.
+				#Notify host of expiration.
+				locker_obj.freeup_locker()
 			else:
 				print "not due"
 	time.sleep(2)
