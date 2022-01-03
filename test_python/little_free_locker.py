@@ -292,15 +292,6 @@ class Locker:
 		else:
 			return 1
 	
-	def freeup_locker(self):		### WE NEVER ACTUALLY ARE USING THIS -- should be handled in Lockers
-		if not self.is_locker_checked_out():
-			raise Exception("Locker " + self.name + " is already free!")
-		else:
-			delattr(self, "due_date")
-			delattr(self, "tenant_number")
-			delattr(self, "start_date")
-			self.renewals_used = 0
-		
 	def renew_locker(self):
 		# Ensure that locker is checked out.
 		if not self.is_locker_checked_out():
