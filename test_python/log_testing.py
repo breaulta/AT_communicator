@@ -1,4 +1,8 @@
 #!/usr/bin/python
+commands = []
+commands.append('help')		#instructions and a list of available lockers
+commands.append('checkout')	#in the form of 'checkout <lockername>'
+commands.append('renew')	#target locker based on origin number
 import time
 from datetime import datetime, timedelta
 import serial
@@ -34,8 +38,11 @@ locker_bank = Lockers()
 logger.info('load from template')
 locker_bank.load_lockers_from_user_input_txt_file("template.txt")
 
-nala = locker_bank.get_locker_object_given_locker_name('Nala')
-nala.freeup_locker
+locker_bank.checkout_locker('5039895540', 'Nala')
+
+locker_bank.freeup_locker('Nala')
+#nala = locker_bank.get_locker_object_given_locker_name('Nala')
+#nala.freeup_locker
 #logger.info('end')
 
 

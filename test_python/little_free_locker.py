@@ -220,6 +220,14 @@ class Lockers:
 			return available
 
 	def freeup_locker(self, lockername):
+		locker = self.get_locker_obj_given_locker_name(lockername)
+		if not locker.is_locker_checked_out():
+			raise Exception("Locker " + locker.name + " is already free!")
+		else:
+			delattr(locker, "due_date")
+			delattr(locker, "tenant_number")
+			delattr(locker, "start_date")
+			locker.renewals_used = 0
 
 #kwargs will hold locker attributes and values.
 class Locker:
@@ -238,10 +246,8 @@ class Locker:
 		self.renewals_used = renewals_used
 		self.onedayflag = onedayflag
 		self.twodayflag = twodayflag
-		
 		self.logger = logging.getLogger('test_logger_app.little_free.Locker')
 		self.logger.info('creating locker')
-		
 	
 	#Stringify a datetime object for storage in a json file.
 	def serialize_date(self, datetime_object):
