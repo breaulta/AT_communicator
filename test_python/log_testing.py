@@ -1,8 +1,4 @@
 #!/usr/bin/python
-commands = []
-commands.append('help')		#instructions and a list of available lockers
-commands.append('checkout')	#in the form of 'checkout <lockername>'
-commands.append('renew')	#target locker based on origin number
 import time
 from datetime import datetime, timedelta
 import serial
