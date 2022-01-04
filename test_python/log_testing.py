@@ -16,29 +16,17 @@ logger.setLevel(logging.DEBUG)	# Set default level?
 fh = logging.FileHandler('locker.log')
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
-#ch = logging.StreamHandler()
-#ch.setLevel(logging.ERROR)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
-#ch.setFormatter(formatter)
+ch.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(fh)
-#logger.addHandler(ch)
+logger.addHandler(ch)
 
-class StreamToLogger(object):
-   """
-   Fake file-like stream object that redirects writes to a logger instance.
-   """
-   def __init__(self, logger, log_level=logging.INFO):
-      self.logger = logger
-      self.log_level = log_level
-      self.linebuf = ''
-
-   def write(self, buf):
-      for line in buf.rstrip().splitlines():
-         self.logger.log(self.log_level, line.rstrip())
-
+from streamtologger import StreamToLogger
 stdout_logger = logging.getLogger('test_logger_app')
 sl = StreamToLogger(stdout_logger, logging.INFO)
 sys.stdout = sl
@@ -52,6 +40,8 @@ sys.stderr = sl
 
 from little_free_locker import Locker
 from little_free_locker import Lockers
+
+print "to stdout please~!"
 
 logger.info('create lockers object')
 locker_bank = Lockers()
