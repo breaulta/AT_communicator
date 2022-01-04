@@ -83,6 +83,11 @@ def find_lockername(incoming_sms, origin_number):
 		lockername = foundnames[0]
 		return lockername
 
+def handleSms(sms_obj):
+	# Create text file.
+	# Write data to text file.
+	# Notify 
+
 
 def handleSms(incoming_sms):
 	#command = decode_input(incoming_sms.text, incoming_sms.number)
@@ -177,6 +182,11 @@ def main():
 
 	# Spawn renewal messages and constantly save state.
 	while 1:
+		# Check if a renewal message needs to be spawned.
+		# Back up data/save current state.
+		# Check for new messages.
+
+
 		now = datetime.now() #keep calculating
 		bank = main_lockers.get_locker_list()
 		for lockername in bank:
