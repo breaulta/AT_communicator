@@ -224,9 +224,9 @@ class Lockers:
 		if not locker.is_locker_checked_out():
 			raise Exception("Locker " + locker.name + " is already free!")
 		else:
-			delattr(locker, "due_date")
-			delattr(locker, "tenant_number")
-			delattr(locker, "start_date")
+			locker.due_date = 'None'
+			locker.tenant_number = 'None'
+			locker.start_date = 'None'
 			locker.renewals_used = 0
 
 #kwargs will hold locker attributes and values.
@@ -284,7 +284,6 @@ class Locker:
 			return 1
 
 	def is_locker_checked_out(self):
-#		if hasattr(self, "due_date"):
 		if self.due_date == 'None':
 			print 'inside is_locker_checked_out'
 			#Is checked out

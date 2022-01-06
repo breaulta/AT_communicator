@@ -67,7 +67,9 @@ while 1:
 			elif hours <= 0 and locker_obj.is_locker_checked_out():
 				# Close tenancy of current locker.
 				#Notify host of expiration.
-				locker_obj.freeup_locker()
+				main_lockers.freeup_locker(lockername)
+				print('freedup locker')
+				#locker_obj.freeup_locker()
 			else:
 				print "not due"
 	time.sleep(2)
