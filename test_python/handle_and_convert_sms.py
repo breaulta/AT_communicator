@@ -45,22 +45,25 @@ def delay_make_a_file():
 	
 # main loop periodically scans a folder for a new file with unique name
 def main():
-	thread = threading.Thread(target=delay_make_a_file())
-	thread.start()
+	#delay_make_a_file()
 	while 1:
-		dirlist = os.listdir(path)
-		if not dirlist:
-			print 'found no new file'
-		else:
-			m = re.search('\d+_new_sms.txt', dirlist[0])
-			if m:
-				fil = path + '/' + dirlist[0]
-				fd = open(fil, 'r')
-				print fd.read()
-				fd.close()
-				os.remove(fil)
+		if os.path.isdir(path):
+			dirlist = os.listdir(path)
+			if not dirlist:
+				print 'found no new file'
 			else:
-				print 'found a non-matching file'
+				for filename in dirlist:
+					m = re.search('\d+_new_sms.txt', filename)
+					if m:
+						fil = path + '/' + dirlist[0]
+						fd = open(fil, 'r')
+						print fd.read()
+						fd.close()
+						os.remove(fil)
+					else:
+						print 'found a non-matching file'
+		else:
+			print 'dir not created'
 		time.sleep(1)
 
 # when one is found, scan in the datas and delete file
