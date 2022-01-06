@@ -64,7 +64,8 @@ class Lockers:
 		locker_to_json = {}
 		locker_to_json['lockers'] = []
 		for locker in self.lockers:
-			del locker.logger
+			if hasattr(locker, 'logger'):
+				del locker.logger
 			locker_to_json['lockers'].append( vars(locker) ) #vars converts Locker object to dict
 		outfile = open(json_database, 'w')
 		json.dump(locker_to_json, outfile)

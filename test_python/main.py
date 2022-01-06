@@ -14,12 +14,15 @@ from gsmmodem.modem import GsmModem
 from little_free_locker import Locker
 from little_free_locker import Lockers
 from streamtologger import StreamToLogger
+# For testing
+from module import SMS
 
 PORT = '/dev/ttyUSB2'
 BAUDRATE = 115200
 PIN = None # SIM card PIN (if any)
 
 sms_database_filename = "sms_database.json"
+new_sms_path = './incoming_sms'
 
 # SMS stock messages
 help_message = "In order to checkout a locker, text this number 'checkout <name_of_locker>'. Command words are 'help' 'renew' 'checkout'. The list of available lockers are as follows: "
@@ -71,6 +74,7 @@ def find_command(incoming_sms, origin_number):
         command = found[0]
         return command
 
+# Maybe use this 
 def find_lockername(incoming_sms, origin_number):
 	foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
 	if len(foundnames) > 1:
@@ -83,55 +87,106 @@ def find_lockername(incoming_sms, origin_number):
 		lockername = foundnames[0]
 		return lockername
 
-def handleSms(sms_obj):
-	# Create text file.
-	# Write data to text file.
-	# Notify 
+# Callback function for modem. Converts caught SMS object into a unique file which is picked up in main.
+#def handleSms(sms_obj):
+def handleSms(incoming_sms_obj):
+    # Create dir if it doesn't already exist.
+    try:
+        os.makedirs(new_sms_path)
+    except OSError:
+        if not os.path.isdir(new_sms_path):
+            raise Exception('dir not created for some reason')
+    filename = new_sms_path + '/' + sms.index + '_new_sms.txt'
+
+    # If it opens, it exists => fail.
+    try:
+        f = open(filename)
+    # Working properly.
+    except IOError:
+        f = open(filename, 'w')
+        sms_list = str(vars(incoming_sms_obj))
+        f.write(sms_list)
+        f.close
+    else:
+        raise Exception('Generated file for incoming SMS should not already exist!')
 
 
-def handleSms(incoming_sms):
+# pull in sms data from new sms file and execute locker control logic on it.
+def check_new_sms(locker_bank):
+	if os.path.isdir(new_sms_path):
+		dirlist = os.listdir(new_sms_path)
+		if not dirlist:
+			print 'found no new file'
+		else:
+			# allows for other files in the dir to not break it.
+			for filename in dirlist:
+				match = re.search('\d+_new_sms.txt', filename)
+				if match:
+					#fil = path + '/' + dirlist[0]
+					fil = new_sms_path + '/' + filename
+					fd = open(fil, 'r')
+					#print fd.read()
+					# create SMS object and store data there
+					#newSms = SMS()
+					json_read_dict = json.load(fd)
+					fd.close()
+					os.remove(fil)
+					sms = SMS(**json_read_dict)
+					#print sms.index
+					parse_and_operate_sms(locker_bank, sms)
+				else:
+					print 'found a non-matching file'
+	else:
+		print 'dir not created'
+
+
+def parse_and_operate_sms(locker_bank, sms_obj):
+	# change after testing
+	incoming_sms = sms_obj.message
+	incoming_number = sms_obj.phone
+	
 	#command = decode_input(incoming_sms.text, incoming_sms.number)
-	command = decode_input(incoming_sms, incoming_number)
+	command = find_command(incoming_sms, incoming_number)
 	if command == 'help':
-        print help_message + locker_bank.list_available_lockers()
-    elif command == 'renew':
-        if locker_bank.user_has_locker_checkedout(incoming_number):
-            print incoming_number
-            locker = locker_bank.get_locker_obj_given_locker_number(incoming_number)
-            print locker
-            renewals_left = locker.get_renewals_left()
-            if renewals_left < 1:
-                print no_renewals_left_msg + " Your locker due date is " + locker.due_date
-            else:
-                locker.renew_locker
-                print "send text informing host of renewal"
-                print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(renewals_left) + " renewwals left."
-        else:
-            print locker_not_checked_out_msg
-    elif command == 'checkout':
-        # Inform potential tenant of the earliest they could checkout a locker.
-        if locker_bank.is_locker_cluster_full():
-            print locker_cluster_full_msg + locker_bank.earliest_possible_release()
-        else:
-            lockernames = locker_bank.get_locker_list()
-            foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
-            if len(foundnames) > 1:
-                print(error_toomany_names)
-            elif len(foundnames) < 1:
-                print(error_toofew_names)
-            elif len(foundnames) == 1:
+		print help_message + locker_bank.list_available_lockers()
+	elif command == 'renew':
+		if locker_bank.user_has_locker_checkedout(incoming_number):
+			print incoming_number
+			locker = locker_bank.get_locker_obj_given_locker_number(incoming_number)
+			print locker
+			renewals_left = locker.get_renewals_left()
+			if renewals_left < 1:
+				print no_renewals_left_msg + " Your locker due date is " + locker.due_date
+			else:
+				locker.renew_locker
+				print "send text informing host of renewal"
+				print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(renewals_left) + " renewwals left."
+		else:
+			print locker_not_checked_out_msg
+	elif command == 'checkout':
+		# Inform potential tenant of the earliest they could checkout a locker.
+		if locker_bank.is_locker_cluster_full():
+			print locker_cluster_full_msg + locker_bank.earliest_possible_release()
+		else:
+			lockernames = locker_bank.get_locker_list()
+			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
+			if len(foundnames) > 1:
+				print(error_toomany_names)
+			elif len(foundnames) < 1:
+				print(error_toofew_names)
+			elif len(foundnames) == 1:
 #               print('found lockername ' + foundnames[0] + '!') # Debug
-                lockername = foundnames[0]
-                print 'try to checkout: ' + lockername  # Debug
-                # try to checkout, give list of available otherwise
-                if locker_bank.checkout_locker(sms_origin_number, lockername):
-                    locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
-                    print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The ccurrent due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
-                else:
-                    # There is at least one locker or
-                    # locker_bank.is_locker_cluster_full would prevent getting here.
-                    #print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
-                    print "The locker " + lockername + " could not be checked out at this time. However, other lockers are available: " + locker_bank.list_available_lockers()
+				lockername = foundnames[0]
+				print 'try to checkout: ' + lockername  # Debug
+				# try to checkout, give list of available otherwise
+				if locker_bank.checkout_locker(incoming_number, lockername):
+					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
+					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The ccurrent due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
+				else:
+					# There is at least one locker or
+					# locker_bank.is_locker_cluster_full would prevent getting here.
+					#print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
+					print "The locker " + lockername + " could not be checked out at this time. However, other lockers are available: " + locker_bank.list_available_lockers()
 
 
 def setUpLogging():
@@ -144,7 +199,7 @@ def setUpLogging():
 	fh.setLevel(logging.DEBUG)
 	# create console handler with a higher log level
 	ch = logging.StreamHandler()
-	# Show everything in stdout. 
+	# Also show everything in stdout. 
 	ch.setLevel(logging.DEBUG) 
 	#ch.setLevel(logging.ERROR)
 	# create formatter and add it to the handlers
@@ -154,7 +209,6 @@ def setUpLogging():
 	# add the handlers to the logger
 	logger.addHandler(fh)
 	logger.addHandler(ch)
-
 	# Send everything from stdout and stderr to the logfile.
 	stdout_logger = logging.getLogger('LFL_app')
 	sl = StreamToLogger(stdout_logger, logging.INFO)
@@ -164,11 +218,39 @@ def setUpLogging():
 	sys.stderr = sl
 
 
+def spawn_renewal_msg(main_lockers):
+	now = datetime.now() #keep calculating
+	bank = main_lockers.get_locker_list()
+	for lockername in bank:
+		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
+		#if hasattr(locker_obj, 'due_date'):
+		if locker_obj.is_locker_checked_out():
+			duedate = locker_obj.deserialize_date()
+			diff = duedate - now
+			seconds = diff.total_seconds()
+			hours = seconds / 3600
+			print hours #debug
+			#renew hours left check
+			if hours <= 24 and locker_obj.onedayflag == 1:
+				locker_obj.onedayflag = 0
+				print "24 hour message"
+				continue
+			elif hours <= 48 and locker_obj.twodayflag == 1:
+				locker_obj.twodayflag = 0
+				print "48 hour message"
+			elif hours <= 0 and locker_obj.is_locker_checked_out():
+				# Close tenancy of current locker.
+				#Notify host and tenant of expiration.
+				main_lockers.freeup_locker(lockername)
+				print 'the locker: ' + lockername + 'has been closed'
+			else:
+				print "not due"
+
+
 def main():
 	#Ensure that we're running as root.
 	if not os.geteuid()==0:
 		raise Exception("Must run as root!")
-
 	setUpLogging()
 	main_lockers = Lockers()
 	# Load unique locker setup from template file curated for host input.
@@ -179,41 +261,17 @@ def main():
 	#Sets modem to PDU mode, not sure why they do this in the example text...
 	#modem.smsTextMode = False
 	#modem.connect(PIN)
+	# will need to pass modem into anything that's sending texts
 
-	# Spawn renewal messages and constantly save state.
+	# Spawn renewal messages and save state.
 	while 1:
+		# Check for new messages and operate on them.
+		check_new_sms(main_lockers)
 		# Check if a renewal message needs to be spawned.
+		spawn_renewal_msg(main_lockers)
 		# Back up data/save current state.
-		# Check for new messages.
-
-
-		now = datetime.now() #keep calculating
-		bank = main_lockers.get_locker_list()
-		for lockername in bank:
-			locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
-			#if hasattr(locker_obj, 'due_date'):
-			if locker_obj.is_locker_checked_out():
-				duedate = locker_obj.deserialize_date()
-				diff = duedate - now
-				seconds = diff.total_seconds()
-				hours = seconds / 3600
-				print hours #debug
-				#renew hours left check
-				if hours <= 24 and locker_obj.onedayflag == 1:
-					locker_obj.onedayflag = 0
-					print "24 hour message"
-					continue
-				elif hours <= 48 and locker_obj.twodayflag == 1:
-					locker_obj.twodayflag = 0
-					print "48 hour message"
-				elif hours <= 0 and locker_obj.is_locker_checked_out():
-					# Close tenancy of current locker.
-					#Notify host of expiration.
-					locker_obj.freeup_locker()
-				else:
-					print "not due"
+		main_lockers.save_lockers_to_json_file()
 		time.sleep(2)
-
 
 
 
