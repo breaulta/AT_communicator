@@ -17,10 +17,10 @@ from module import SMS
 
 path = './incoming_sms'
 
-def delay_make_a_file():
+def handleSms(sms_obj):
 	#time.sleep(5)
 	# test input sms object
-	sms = SMS('1', 'ok', '5039895540', '1/4/2022', 'manual test sms msg')
+	#sms = SMS('1', 'ok', '5039895540', '1/4/2022', 'manual test sms msg')
 
 	# write object datas to file
 	# Create dir if it doesn't already exist.
@@ -29,7 +29,7 @@ def delay_make_a_file():
 	except OSError:
 		if not os.path.isdir(path):
 			raise Exception('dir not created for some reason')
-	filename = path + '/' + sms.index + '_new_sms.txt'
+	filename = path + '/' + sms_obj.index + '_new_sms.txt'
 
 	# If it opens, it exists => fail.
 	try:
@@ -38,7 +38,7 @@ def delay_make_a_file():
 	except IOError:
 		f = open(filename, 'w')
 		#sms_list = str(vars(sms))
-		sms_dict = vars(sms)
+		sms_dict = vars(sms_obj)
 		json.dump(sms_dict, f)
 		#f.write(sms_list)
 		f.close
@@ -47,7 +47,16 @@ def delay_make_a_file():
 	
 # main loop periodically scans a folder for a new file with unique name
 def main():
-	delay_make_a_file()
+	# For main testing
+	sms1 = SMS('1', 'ok', '5039895540', '1/4/2022', 'this message should fail bc improper input')
+	sms2 = SMS('2', 'ok', '5039895540', '1/5/2022', 'checkout Nala')
+	sms3 = SMS('3', 'ok', '5039895540', '1/4/2022', 'Lenron checkout')
+	handleSms(sms1)
+	handleSms(sms2)
+	handleSms(sms3)
+	exit(0)
+
+	# comment out above to test below
 	while 1:
 		if os.path.isdir(path):
 			dirlist = os.listdir(path)
