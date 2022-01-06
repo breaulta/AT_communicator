@@ -46,9 +46,10 @@ class Lockers:
 				return locker
 		print "The locker with name " + locker_name + " was not found."
 
+	# Not currently used
 	def get_locker_obj_given_locker_number(self, locker_number):
 		for locker in self.lockers:
-			if hasattr(locker, "tenant_number"):
+			if locker.tenant_number != 'None':
 				#print locker.tenant_number + " obj"
 				if locker_number == locker.tenant_number:
 					return locker
@@ -163,9 +164,10 @@ class Lockers:
 		self.save_lockers_to_json_file()
 		self.logger.info('completed pulling data from template file')
 
+	# Not currently used
 	def user_has_locker_checkedout (self, number):
 		for locker in self.lockers:
-			if hasattr(locker, "tenant_number"): # Why does hasattr work here but not for due_date?
+			if locker.tenant_number != 'None':
 				if locker.tenant_number == number:
 					return 1
 		return 0
@@ -195,11 +197,10 @@ class Lockers:
 	# True/false returns are for tenant notification messages.
 	def checkout_locker(self, number, lockername):
 		for locker in self.lockers:
-			if hasattr(locker, 'tenant_number'):
-				print 'tenant_number: ' + locker.tenant_number
-				if locker.tenant_number == number:
-					print 'how'
-					return 0
+			#print 'tenant_number: ' + locker.tenant_number
+			if locker.tenant_number == number:
+				print 'duplicate number'
+				return 'duplicate number'
 		locker = self.get_locker_obj_given_locker_name(lockername)
 		if locker._checkout_locker_try(number):
 			# Locker checkedout
@@ -211,7 +212,7 @@ class Lockers:
 	def list_available_lockers(self):
 		available = ''
 		for locker in self.lockers:
-			if hasattr(locker, 'tenant_number'):	# Locker is in use.
+			if locker.tenant_number != 'None':
 				continue
 			else:
 				available += locker.name + ' '
@@ -228,12 +229,12 @@ class Lockers:
 			locker.due_date = 'None'
 			locker.tenant_number = 'None'
 			locker.start_date = 'None'
-			locker.renewals_used = 0
+			locker.renewals_used = '0'
 
 #kwargs will hold locker attributes and values.
 class Locker:
 	def __init__(self, name, combo, address, host_number, checkout_time_length, total_renewals_possible,
-				 start_date=None, due_date=None, tenant_nubmer=None, renewals_used=0, onedayflag=None,
+				 start_date=None, due_date=None, tenant_number=None, renewals_used='0', onedayflag=None,
 				 twodayflag=None):
 		self.name = name
 		self.combo = combo
@@ -243,7 +244,7 @@ class Locker:
 		self.total_renewals_possible = total_renewals_possible
 		self.start_date = start_date
 		self.due_date = due_date
-		self.tenant_nubmer = tenant_nubmer
+		self.tenant_number = tenant_number
 		self.renewals_used = renewals_used
 		self.onedayflag = onedayflag
 		self.twodayflag = twodayflag
@@ -257,7 +258,7 @@ class Locker:
 
 	#Return a datetime object from our json file.
 	def deserialize_date(self):
-		match_date = re.search('^(\d+)/(\d+)/(\d+)$', self.due_date)
+		match_date = re.search('^(\d+)/(\d+)/(\d+)$', str(self.due_date))
 		if match_date:
 			month = int(match_date.groups()[0])
 			day = int(match_date.groups()[1])
@@ -278,7 +279,7 @@ class Locker:
 			self.start_date = self.serialize_date(now)
 			# record tenant number
 			self.tenant_number = tenant_number
-			self.renewals_used = 0
+			self.renewals_used = '0'
 			# set renewal flags
 			self.onedayflag = 1
 			self.twodayflag = 1
@@ -297,7 +298,7 @@ class Locker:
 		if not self.is_locker_checked_out():
 			raise Exception("Can't renew locker " + self.name + ", it's not checked out!")
 		# Ensure that we have renewals remaining
-		if self.renewals_used >= int(self.total_renewals_possible):
+		if int(self.renewals_used) >= int(self.total_renewals_possible):
 			raise Exception("Can't renew locker " + self.name + ", all renewals have already been used!")
 		# Calculate new due date
 		now = datetime.now()
@@ -306,10 +307,10 @@ class Locker:
 		# Serialize datetime object.
 		self.due_date = self.serialize_date(due_date)
 		# Increment renewals used up.
-		self.renewals_used = self.renewals_used + 1
+		self.renewals_used = str(int(self.renewals_used) + 1)
 
 	def get_renewals_left(self):
-		return int(self.total_renewals_possible) - self.renewals_used
+		return int(self.total_renewals_possible) - int(self.renewals_used)
 
 
 

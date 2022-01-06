@@ -36,21 +36,7 @@ no_renewals_left_msg = "Sorry, there are no renewals left for this checkout peri
 locker_renewed_msg = "Your locker has been renewed."
 locker_not_checked_out_msg = "No locker has been checked out with the number you're texting from."
 locker_cluster_full_msg = "This locker cluster is full. The next possible opening is: "
-
-# To be deleted once integration testing is done:
-#Test Inputs here
-#incoming_sms = "list lockers"
-#incoming_sms = "checkout"
-incoming_sms = "checkout Nala"
-#incoming_sms = "help"
-#incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
-#incoming_sms = "Nala"
-#incoming_sms = "he lp"
-#incoming_sms = "checkout Nala" # Test checkout bloc
-#incoming_sms = "renew"
-
-#incoming_number = "fake number"
-incoming_number = "5039895540"
+error_one_per_tenant = "Sorry, this locker bank only allows a tenant to check out one locker at a time."
 
 # SMS commands
 commands = []
@@ -74,7 +60,7 @@ def find_command(incoming_sms, origin_number):
         command = found[0]
         return command
 
-# Maybe use this 
+# Maybe delete this 
 def find_lockername(incoming_sms, origin_number):
 	foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
 	if len(foundnames) > 1:
@@ -179,7 +165,8 @@ def parse_and_operate_sms(locker_bank, sms_obj):
 				lockername = foundnames[0]
 				print 'try to checkout: ' + lockername  # Debug
 				# try to checkout, give list of available otherwise
-				if locker_bank.checkout_locker(incoming_number, lockername):
+				result = locker_bank.checkout_locker(incoming_number, lockername)
+				if result:
 					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
 					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The ccurrent due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
 				else:
