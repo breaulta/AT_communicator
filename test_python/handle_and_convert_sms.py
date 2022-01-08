@@ -48,8 +48,8 @@ def handleSms(sms_obj):
 # main loop periodically scans a folder for a new file with unique name
 def main():
 	# For main testing
-	sms1 = SMS('1', 'ok', '5039895540', '1/4/2022', 'this message should fail bc improper input')
-	sms2 = SMS('2', 'ok', '5039895540', '1/5/2022', 'checkout Nala')
+	sms1 = SMS('1', 'ok', '9895540', '1/4/2022', 'checkout 3rd')
+	sms2 = SMS('2', 'ok', '5540', '1/5/2022', 'checkout Nala')
 	sms3 = SMS('3', 'ok', '5039895540', '1/4/2022', 'Lenron checkout')
 	handleSms(sms1)
 	handleSms(sms2)

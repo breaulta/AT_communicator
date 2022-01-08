@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import logging
-mod_logger = logging.getLogger('test_logger_app.little_free')
+mod_logger = logging.getLogger('LFL_app.little_free')
 
 json_database = "locker_database.json"
 
@@ -15,7 +15,7 @@ json_database = "locker_database.json"
 class Lockers:
 	def __init__(self):
 		self.lockers = []
-		self.logger = logging.getLogger('test_logger_app.little_free.Lockers')
+		self.logger = logging.getLogger('LFL_app.little_free.Lockers')
 		self.logger.info('creating locker bank')
 
 	def _add_locker(self, locker):
@@ -199,7 +199,6 @@ class Lockers:
 		for locker in self.lockers:
 			#print 'tenant_number: ' + locker.tenant_number
 			if locker.tenant_number == number:
-				print 'duplicate number'
 				return 'duplicate number'
 		locker = self.get_locker_obj_given_locker_name(lockername)
 		if locker._checkout_locker_try(number):
@@ -207,7 +206,7 @@ class Lockers:
 			return 1
 		else:
 			# Exception would have triggered.
-			return 0
+			return 'checked out'
 
 	def list_available_lockers(self):
 		available = ''

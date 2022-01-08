@@ -166,14 +166,18 @@ def parse_and_operate_sms(locker_bank, sms_obj):
 				print 'try to checkout: ' + lockername  # Debug
 				# try to checkout, give list of available otherwise
 				result = locker_bank.checkout_locker(incoming_number, lockername)
-				if result:
+				if result == 1:
 					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
-					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The ccurrent due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
-				else:
+					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
+				elif result == 'duplicate number':
+					print "There is already a locker checked out under this number!"
+				elif result == 'checked out':
+					print "The locker " + lockername + " has already been checked out! Other available lockers: " + locker_bank.list_available_lockers()
+				##else:
 					# There is at least one locker or
 					# locker_bank.is_locker_cluster_full would prevent getting here.
 					#print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
-					print "The locker " + lockername + " could not be checked out at this time. However, other lockers are available: " + locker_bank.list_available_lockers()
+				##	print "The locker " + lockername + " could not be checked out at this time. However, other lockers are available: " + locker_bank.list_available_lockers()
 
 
 def setUpLogging():
@@ -197,16 +201,24 @@ def setUpLogging():
 	logger.addHandler(fh)
 	logger.addHandler(ch)
 	# Send everything from stdout and stderr to the logfile.
-	stdout_logger = logging.getLogger('LFL_app')
+	stdout_logger = logging.getLogger('LFL_app.stdout')
 	sl = StreamToLogger(stdout_logger, logging.INFO)
 	sys.stdout = sl
-	stderr_logger = logging.getLogger('LFL_app')
+	stderr_logger = logging.getLogger('LFL_app.stderr')
 	sl = StreamToLogger(stderr_logger, logging.ERROR)
 	sys.stderr = sl
 
 
-def spawn_renewal_msg(main_lockers):
+def timing_renewal_handler(main_lockers, server_start_time):
+	logger = logging.getLogger('LFL_app.timing_renewal_handler')
 	now = datetime.now() #keep calculating
+	# log message stating the program status every hour. uptime, number of lockers and due date, 
+	uptime_calc = now - server_start_time
+	uptime_seconds = int(uptime_calc.total_seconds())
+	uptime_hours = uptime_seconds / 3600
+	#if uptime_seconds % 3 == 0:
+	if uptime_seconds % 3600 == 0:
+		logger.info('Server uptime: ' + str(uptime_hours) + ' hours. ' + 'Uptime seconds: ' + str(uptime_seconds))
 	bank = main_lockers.get_locker_list()
 	for lockername in bank:
 		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
@@ -218,26 +230,28 @@ def spawn_renewal_msg(main_lockers):
 			hours = seconds / 3600
 			print hours #debug
 			#renew hours left check
+			if hours <= 48 and locker_obj.twodayflag == 1:
+				locker_obj.twodayflag = 0
+				print "48 hour message for: "  + lockername
 			if hours <= 24 and locker_obj.onedayflag == 1:
 				locker_obj.onedayflag = 0
-				print "24 hour message"
-				continue
-			elif hours <= 48 and locker_obj.twodayflag == 1:
-				locker_obj.twodayflag = 0
-				print "48 hour message"
-			elif hours <= 0 and locker_obj.is_locker_checked_out():
+				print "24 hour message for: " + locker_obj.name
+				#continue
+			if hours <= 0 and locker_obj.is_locker_checked_out():
 				# Close tenancy of current locker.
 				#Notify host and tenant of expiration.
 				main_lockers.freeup_locker(lockername)
-				print 'the locker: ' + lockername + 'has been closed'
+				print 'the locker: ' + lockername + ' has been closed!'
 			else:
-				print "not due"
+				print 'the locker: ' + lockername + ' is checked out and not due.'
 
 
 def main():
 	#Ensure that we're running as root.
 	if not os.geteuid()==0:
 		raise Exception("Must run as root!")
+	# For uptime, hourly calculation
+	start_time = datetime.now()
 	setUpLogging()
 	main_lockers = Lockers()
 	# Load unique locker setup from template file curated for host input.
@@ -254,8 +268,8 @@ def main():
 	while 1:
 		# Check for new messages and operate on them.
 		check_new_sms(main_lockers)
-		# Check if a renewal message needs to be spawned.
-		spawn_renewal_msg(main_lockers)
+		# Check if a renewal message needs to be spawned and handle timing events.
+		timing_renewal_handler(main_lockers, start_time)
 		# Back up data/save current state.
 		main_lockers.save_lockers_to_json_file()
 		time.sleep(2)
