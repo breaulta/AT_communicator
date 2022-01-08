@@ -137,16 +137,16 @@ def parse_and_operate_sms(locker_bank, sms_obj):
 		print help_message + locker_bank.list_available_lockers()
 	elif command == 'renew':
 		if locker_bank.user_has_locker_checkedout(incoming_number):
-			print incoming_number
+			#print incoming_number
 			locker = locker_bank.get_locker_obj_given_locker_number(incoming_number)
-			print locker
+			#print locker
 			renewals_left = locker.get_renewals_left()
 			if renewals_left < 1:
 				print no_renewals_left_msg + " Your locker due date is " + locker.due_date
 			else:
-				locker.renew_locker
+				locker.renew_locker()
 				print "send text informing host of renewal"
-				print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(renewals_left) + " renewwals left."
+				print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(locker.get_renewals_left()) + " renewals left."
 		else:
 			print locker_not_checked_out_msg
 	elif command == 'checkout':

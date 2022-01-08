@@ -309,6 +309,7 @@ class Locker:
 		self.renewals_used = str(int(self.renewals_used) + 1)
 
 	def get_renewals_left(self):
+		#print 'possible renewals: ' + self.total_renewals_possible + ' renewals used: ' + self.renewals_used
 		return int(self.total_renewals_possible) - int(self.renewals_used)
 
 
