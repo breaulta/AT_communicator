@@ -76,25 +76,27 @@ def find_lockername(incoming_sms, origin_number):
 # Callback function for modem. Converts caught SMS object into a unique file which is picked up in main.
 #def handleSms(sms_obj):
 def handleSms(incoming_sms_obj):
-    # Create dir if it doesn't already exist.
-    try:
-        os.makedirs(new_sms_path)
-    except OSError:
-        if not os.path.isdir(new_sms_path):
-            raise Exception('dir not created for some reason')
-    filename = new_sms_path + '/' + sms.index + '_new_sms.txt'
+	logger = logging.getLogger('LFL_app.handleSms')
+	logger.info('Caught incoming sms object!~ message: ~' + incoming_sms_obj.text + '~')
+	# Create dir if it doesn't already exist.
+	try:
+		os.makedirs(new_sms_path)
+	except OSError:
+		if not os.path.isdir(new_sms_path):
+			raise Exception('dir not created for some reason')
+	filename = new_sms_path + '/' + incoming_sms_obj.index + '_new_sms.txt'
 
-    # If it opens, it exists => fail.
-    try:
-        f = open(filename)
-    # Working properly.
-    except IOError:
-        f = open(filename, 'w')
-        sms_list = str(vars(incoming_sms_obj))
-        f.write(sms_list)
-        f.close
-    else:
-        raise Exception('Generated file for incoming SMS should not already exist!')
+	# If it opens, it exists => fail.
+	try:
+		f = open(filename)
+	# Working properly.
+	except IOError:
+		f = open(filename, 'w')
+		sms_list = str(vars(incoming_sms_obj))
+		f.write(sms_list)
+		f.close
+	else:
+		raise Exception('Generated file for incoming SMS should not already exist!')
 
 
 # pull in sms data from new sms file and execute locker control logic on it.
@@ -258,10 +260,10 @@ def main():
 	main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 
 	#Initialize Modem, set to call handleSms() when a text is received.
-	#modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
+	modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
 	#Sets modem to PDU mode, not sure why they do this in the example text...
-	#modem.smsTextMode = False
-	#modem.connect(PIN)
+	modem.smsTextMode = False
+	modem.connect(PIN)
 	# will need to pass modem into anything that's sending texts
 
 	# Spawn renewal messages and save state.
