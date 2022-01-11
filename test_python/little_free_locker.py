@@ -286,7 +286,6 @@ class Locker:
 
 	def is_locker_checked_out(self):
 		if self.due_date == 'None':
-			print 'inside is_locker_checked_out'
 			#Is checked out
 			return 0
 		else:

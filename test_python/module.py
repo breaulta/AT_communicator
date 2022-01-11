@@ -485,9 +485,8 @@ class Transmitter:
 			#Array has elements, and those elements are SMS objects.
 			return 1
 
-#remove
 class SMS:
-		def __init__(self, index, status, phone, date, message):
+		def __init__(self, phone, date, message, index=None, status=None):
 		#def __init__(self, index):
 			self.index = index
 			self.status	= status 

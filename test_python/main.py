@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import serial
 import re
 import json
+import ast
 import os
 import logging
 import sys
@@ -84,23 +85,29 @@ def handleSms(incoming_sms_obj):
 	except OSError:
 		if not os.path.isdir(new_sms_path):
 			raise Exception('dir not created for some reason')
-	filename = new_sms_path + '/' + incoming_sms_obj.index + '_new_sms.txt'
+	#filename = new_sms_path + '/' + incoming_sms_obj.time + '_new_sms.txt'
+	# use seconds since epoch as unique identifier.
+	filename = new_sms_path + '/' + str(time.time()) + '_new_sms.txt'
 
 	# If it opens, it exists => fail.
 	try:
 		f = open(filename)
 	# Working properly.
 	except IOError:
+		sms_obj = SMS(phone=str(incoming_sms_obj.number), message=incoming_sms_obj.text, date=time.time())
 		f = open(filename, 'w')
-		sms_list = str(vars(incoming_sms_obj))
-		f.write(sms_list)
+		sms_list = str(vars(sms_obj))
+		json_sms_obj = ast.literal_eval(sms_list)
+		#sms_list_str = json.dumps
+		f.write(json.dumps(json_sms_obj))
+		#f.write(incoming_sms_obj.number + ':' + incoming_sms_obj.text)
 		f.close
 	else:
 		raise Exception('Generated file for incoming SMS should not already exist!')
 
 
 # pull in sms data from new sms file and execute locker control logic on it.
-def check_new_sms(locker_bank):
+def check_new_sms(locker_bank, modem):
 	if os.path.isdir(new_sms_path):
 		dirlist = os.listdir(new_sms_path)
 		if not dirlist:
@@ -120,15 +127,18 @@ def check_new_sms(locker_bank):
 					fd.close()
 					os.remove(fil)
 					sms = SMS(**json_read_dict)
+					
+					# Boomerang test
+					modem.sendSms(sms.phone, sms.message)
 					#print sms.index
-					parse_and_operate_sms(locker_bank, sms)
+					#parse_and_operate_sms(locker_bank, sms, modem)
 				else:
 					print 'found a non-matching file'
 	else:
-		print 'dir not created'
+		print 'dir not created yet'
 
 
-def parse_and_operate_sms(locker_bank, sms_obj):
+def parse_and_operate_sms(locker_bank, sms_obj, modem):
 	# change after testing
 	incoming_sms = sms_obj.message
 	incoming_number = sms_obj.phone
@@ -183,9 +193,17 @@ def parse_and_operate_sms(locker_bank, sms_obj):
 
 
 def setUpLogging():
+	#logger = logging.getLogger()
+	#logger.addHandler('LFL_app')
+	#logger.addHandler('gsmmodem')
+	
 	# LFL_app is the identifier.
 	logger = logging.getLogger('LFL_app')
 	logger.setLevel(logging.DEBUG)
+
+	modem_logger = logging.getLogger('gsmmodem')
+	
+
 	# create file handler which logs even debug messages
 	fh = logging.FileHandler('locker.log')
 	# Send everything to logfile.
@@ -202,6 +220,10 @@ def setUpLogging():
 	# add the handlers to the logger
 	logger.addHandler(fh)
 	logger.addHandler(ch)
+
+	modem_logger.addHandler(fh)
+	modem_logger.addHandler(ch)
+
 	# Send everything from stdout and stderr to the logfile.
 	stdout_logger = logging.getLogger('LFL_app.stdout')
 	sl = StreamToLogger(stdout_logger, logging.INFO)
@@ -211,7 +233,7 @@ def setUpLogging():
 	sys.stderr = sl
 
 
-def timing_renewal_handler(main_lockers, server_start_time):
+def timing_renewal_handler(main_lockers, server_start_time, modem):
 	logger = logging.getLogger('LFL_app.timing_renewal_handler')
 	now = datetime.now() #keep calculating
 	# log message stating the program status every hour. uptime, number of lockers and due date, 
@@ -269,9 +291,9 @@ def main():
 	# Spawn renewal messages and save state.
 	while 1:
 		# Check for new messages and operate on them.
-		check_new_sms(main_lockers)
+		check_new_sms(main_lockers, modem)
 		# Check if a renewal message needs to be spawned and handle timing events.
-		timing_renewal_handler(main_lockers, start_time)
+		timing_renewal_handler(main_lockers, start_time, modem)
 		# Back up data/save current state.
 		main_lockers.save_lockers_to_json_file()
 		time.sleep(2)
