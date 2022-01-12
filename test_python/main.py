@@ -45,6 +45,12 @@ commands.append('help')     #instructions and a list of available lockers
 commands.append('checkout') #in the form of 'checkout <lockername>'
 commands.append('renew')    #target locker based on origin number
 
+# send sms function that includes the log.
+def send_sms(modem, number, message):
+	logger = logging.getLogger('LFL_app.send_sms')
+	logger.info('Sending sms with text: ' + message + ' to phone number: ' + number)
+	modem.sendSms(number, message)
+
 # Extract a single command from the input, error if there is not exactly 1 command.
 def find_command(incoming_sms, origin_number):
     #find all matches of the words in commands in the string incoming_sms
@@ -75,10 +81,11 @@ def find_lockername(incoming_sms, origin_number):
 		return lockername
 
 # Callback function for modem. Converts caught SMS object into a unique file which is picked up in main.
+# This is done in order to 
 #def handleSms(sms_obj):
 def handleSms(incoming_sms_obj):
 	logger = logging.getLogger('LFL_app.handleSms')
-	logger.info('Caught incoming sms object!~ message: ~' + incoming_sms_obj.text + '~')
+	logger.info('Caught incoming sms from:' + incoming_sms_obj.number + ' message:' + incoming_sms_obj.text )
 	# Create dir if it doesn't already exist.
 	try:
 		os.makedirs(new_sms_path)
