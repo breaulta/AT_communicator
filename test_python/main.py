@@ -12,10 +12,10 @@ import sys
 sys.dont_write_bytecode = True
 
 from gsmmodem.modem import GsmModem
+from gsmmodem.exceptions import TimeoutException, PinRequiredError, IncorrectPinError
 from little_free_locker import Locker
 from little_free_locker import Lockers
 from streamtologger import StreamToLogger
-# For testing
 from module import SMS
 
 PORT = '/dev/ttyUSB2'
@@ -48,8 +48,17 @@ commands.append('renew')    #target locker based on origin number
 # send sms function that includes the log.
 def send_sms(modem, number, message):
 	logger = logging.getLogger('LFL_app.send_sms')
-	logger.info('Sending sms with text: ' + message + ' to phone number: ' + number)
-	modem.sendSms(number, message)
+	logger.info('Attempting to send sms with text: ' + message + ' to phone number: ' + number)
+	try:
+		#sent_sms = modem.sendSms(number, message, waitForDeliveryReport=True, deliveryTimeout=30)
+		sent_sms = modem.sendSms(number, message, waitForDeliveryReport=False)
+	except TimeoutException:
+		logger.info('Timeout occurred with sending sms.')
+	else:
+		if sent_sms.report:
+			print('Message sent{0}'.format(' and delivered OK.' if sms.status == SentSms.DELIVERED else ', but delivery failed.'))
+		else:
+			logger.info('sent sms report not received.')
 
 # Extract a single command from the input, error if there is not exactly 1 command.
 def find_command(incoming_sms, origin_number):
@@ -136,7 +145,8 @@ def check_new_sms(locker_bank, modem):
 					sms = SMS(**json_read_dict)
 					
 					# Boomerang test
-					modem.sendSms(sms.phone, sms.message)
+					#modem.sendSms(sms.phone, sms.message)
+					send_sms(modem, sms.phone, sms.message)
 					#print sms.index
 					#parse_and_operate_sms(locker_bank, sms, modem)
 				else:
@@ -292,8 +302,17 @@ def main():
 	modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
 	#Sets modem to PDU mode, not sure why they do this in the example text...
 	modem.smsTextMode = False
-	modem.connect(PIN)
-	# will need to pass modem into anything that's sending texts
+	logger = logging.getLogger('LFL_app')
+	logger.info('Connecting to modem...')
+	try:
+		modem.connect(PIN)
+	except PinRequiredError:
+		raise Exception('Error: SIM card PIN required.')
+	except IncorrectPinError:
+		raise Exception('Error: Incorrect SIM card PIN entered.')
+	else:
+		logger.info('Connection to modem made successfully!')
+		
 
 	# Spawn renewal messages and save state.
 	while 1:
