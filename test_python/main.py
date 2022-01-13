@@ -32,8 +32,8 @@ error_toomany_message = "Sorry, that was too many command words. " + help_messag
 error_toofew_message = "Sorry, that was too few command words. " + help_message
 error_generic_message= "Sorry, I did not understand that. " + help_message
 checkout_message = "Congratulations! You have successfully checked out (locker.name). To open this locker, use the combination: (locker.combo) . This locker must be emptied by (locker.due_date)."
-error_toomany_names = "There were too many matched lockernames in your command. You cannot checkout multiple lockers. Please reply with exactly one lockername in order to checkout that locker." + help_message
-error_toofew_names = "You didn't appear to correctly input the name of the locker you wish to checkout." + help_message
+error_toomany_names = "There were too many matched lockernames in your command. You cannot checkout multiple lockers. Please reply with exactly one lockername in order to checkout that locker. " + help_message
+error_toofew_names = "You didn't appear to correctly input the name of the locker you wish to checkout. " + help_message
 no_renewals_left_msg = "Sorry, there are no renewals left for this checkout period."
 locker_renewed_msg = "Your locker has been renewed."
 locker_not_checked_out_msg = "No locker has been checked out with the number you're texting from."
@@ -130,14 +130,16 @@ def check_new_sms(locker_bank, modem):
 
 
 # Extract a single command from the input, error if there is not exactly 1 command.
-def find_command(modem, incoming_sms, origin_number):
+def find_command(modem, incoming_sms, origin_number, locker_bank):
     #find all matches of the words in commands in the string incoming_sms
     found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms, re.IGNORECASE)
     # exactly 1 command is valid.
     if len(found) > 1:
-		send_sms(modem, origin_number, error_toomany_message)
+		return_message = error_toomany_message + locker_bank.list_available_lockers()
+		send_sms(modem, origin_number, return_message)
     elif len(found) < 1:
-		send_sms(modem, origin_number, error_toofew_message)
+		return_message = error_toofew_message + locker_bank.list_available_lockers()
+		send_sms(modem, origin_number, return_message)
     elif len(found) == 1:
         print('found command ' + found[0] + '!')
         command = found[0]
@@ -151,15 +153,23 @@ def parse_and_operate_sms(locker_bank, sms_obj, modem):
 	logger = logging.getLogger('LFL_app.parse_and_operate_sms')
 	
 	#command = decode_input(incoming_sms.text, incoming_sms.number)
-	command = find_command(modem, incoming_sms, incoming_number)
-	command = command.lower()
+	command = find_command(modem, incoming_sms, incoming_number, locker_bank)
+	if command:
+		command = command.lower()
 	if command == 'help':
 		logger.info('Entering help block.')
-		#print help_message + locker_bank.list_available_lockers()
+		print help_message + locker_bank.list_available_lockers()
 		return_message = help_message + locker_bank.list_available_lockers()
 		send_sms(modem, incoming_number, return_message)
 	elif command == 'close':
 		logger.info('Entering close block.')
+		if locker_bank.user_has_locker_checkedout(incoming_number):
+			locker_obj = locker_bank.get_locker_obj_given_locker_number(incoming_number)
+			locker_bank.freeup_locker(locker_obj.name)
+			close_message = 'The locker, ' + locker_obj.name + ', has been closed.'
+			send_sms(modem, incoming_number, close_message)
+		else:
+			send_sms(modem, incoming_number, "You don't have a locker checked out!")
 	elif command == 'renew':
 		logger.info('Entering renew block.')
 		if locker_bank.user_has_locker_checkedout(incoming_number):
@@ -188,10 +198,11 @@ def parse_and_operate_sms(locker_bank, sms_obj, modem):
 			# This needs to be exact case for now
 			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms) #, re.IGNORECASE)
 			if len(foundnames) > 1:
-				print()
-				send_sms(modem, incoming_number, error_toomany_names)
+				return_message = error_toomany_names + locker_bank.list_available_lockers()
+				send_sms(modem, incoming_number, return_message)
 			elif len(foundnames) < 1:
-				send_sms(modem, incoming_number, error_toofew_name)
+				return_message = error_toofew_names + locker_bank.list_available_lockers()
+				send_sms(modem, incoming_number, return_message)
 			elif len(foundnames) == 1:
 				print('found lockername ' + foundnames[0] + '!') # Debug
 				lockername = foundnames[0]
