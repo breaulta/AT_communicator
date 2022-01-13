@@ -7,6 +7,7 @@ import json
 import ast
 import os
 import logging
+import signal
 import sys
 #Don't write a pesky .pyc file.
 sys.dont_write_bytecode = True
@@ -287,6 +288,13 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 				print 'the locker: ' + lockername + ' is checked out and not due.'
 
 
+def signal_handler(signal, frame):
+	logger = logging.getLogger('LFL_app.signal_handler')
+	logger.info('signal: ' + str(signal) + ' was caught! Closing modem and then program...')
+	modem.close()
+	sys.exit(0)
+
+
 def main():
 	#Ensure that we're running as root.
 	if not os.geteuid()==0:
@@ -294,6 +302,7 @@ def main():
 	# For uptime, hourly calculation
 	start_time = datetime.now()
 	setUpLogging()
+
 	main_lockers = Lockers()
 	# Load unique locker setup from template file curated for host input.
 	main_lockers.load_lockers_from_user_input_txt_file("template.txt")
@@ -313,8 +322,11 @@ def main():
 	else:
 		logger.info('Connection to modem made successfully!')
 		
+	# Register signal handlers in order to shut down modem gracefully.
+	signal.signal(signal.SIGINT, signal_handler)
+	signal.signal(signal.SIGTERM, signal_handler)
 
-	# Spawn renewal messages and save state.
+	# Check for new received messages, spawn renewal messages, and save state.
 	while 1:
 		# Check for new messages and operate on them.
 		check_new_sms(main_lockers, modem)
