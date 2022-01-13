@@ -24,6 +24,7 @@ BAUDRATE = 115200
 PIN = None # SIM card PIN (if any)
 
 sms_database_filename = "sms_database.json"
+locker_database = 'locker_database.json'
 new_sms_path = './incoming_sms'
 
 # SMS stock messages
@@ -325,7 +326,11 @@ def main():
 
 	main_lockers = Lockers()
 	# Load unique locker setup from template file curated for host input.
-	main_lockers.load_lockers_from_user_input_txt_file("template.txt")
+	if os.path.isfile(locker_database):
+		main_lockers.json_file_to_lockers_obj()
+	else:
+		print 'Locker database not found! Creating new one from template file...'
+		main_lockers.load_lockers_from_user_input_txt_file("template.txt")
 
 	#Initialize Modem, set to call handleSms() when a text is received.
 	modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)

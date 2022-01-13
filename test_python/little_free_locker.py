@@ -46,7 +46,6 @@ class Lockers:
 				return locker
 		print "The locker with name " + locker_name + " was not found."
 
-	# Not currently used
 	def get_locker_obj_given_locker_number(self, locker_number):
 		for locker in self.lockers:
 			if locker.tenant_number != 'None':
