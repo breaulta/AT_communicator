@@ -18,8 +18,8 @@ if [ "$_IP" ]; then
 fi
 
 cd /home/pi/communicator/test_python
-# This will probably change to the bash script that keeps it running
-sudo python /home/pi/communicator/test_python/startup_test.py
+sudo bash startup_msg.sh
+sudo bash maintain_server.sh
 exit 0
 
 
