@@ -45,6 +45,7 @@ commands = []
 commands.append('help')     #instructions and a list of available lockers
 commands.append('checkout') #in the form of 'checkout <lockername>'
 commands.append('renew')    #target locker based on origin number
+commands.append('close')    # Close tenancy of locker based on origin number
 
 # send sms function that includes the log.
 def send_sms(modem, number, message):
@@ -157,6 +158,8 @@ def parse_and_operate_sms(locker_bank, sms_obj, modem):
 		#print help_message + locker_bank.list_available_lockers()
 		return_message = help_message + locker_bank.list_available_lockers()
 		send_sms(modem, incoming_number, return_message)
+	elif command == 'close':
+		logger.info('Entering close block.')
 	elif command == 'renew':
 		logger.info('Entering renew block.')
 		if locker_bank.user_has_locker_checkedout(incoming_number):
@@ -277,14 +280,17 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 			#renew hours left check
 			if hours <= 48 and locker_obj.twodayflag == 1:
 				locker_obj.twodayflag = 0
-				print "48 hour message for: "  + lockername
+				return_message = "The locker, " + lockername + ", will be due in 48 hours."
+				send_sms(modem, locker_obj.tenant_number, return_message)
 			if hours <= 24 and locker_obj.onedayflag == 1:
 				locker_obj.onedayflag = 0
-				print "24 hour message for: " + locker_obj.name
-				#continue
+				return_message = "The locker, " + lockername + ", will be due in 24 hours."
+				send_sms(modem, locker_obj.tenant_number, return_message)
 			if hours <= 0 and locker_obj.is_locker_checked_out():
-				# Close tenancy of current locker.
 				#Notify host and tenant of expiration.
+				return_message = "The locker, " + lockername + ", has been closed."
+				send_sms(modem, locker_obj.tenant_number, return_message)
+				# Close tenancy of current locker.
 				main_lockers.freeup_locker(lockername)
 				print 'the locker: ' + lockername + ' has been closed!'
 			else:
