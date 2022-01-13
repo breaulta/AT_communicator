@@ -61,34 +61,6 @@ def send_sms(modem, number, message):
 		else:
 			logger.info('sent sms report not received.')
 
-# Extract a single command from the input, error if there is not exactly 1 command.
-def find_command(incoming_sms, origin_number):
-    #find all matches of the words in commands in the string incoming_sms
-    found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
-    # exactly 1 command is valid.
-    if len(found) > 1:
-        print(error_toomany_message)
-		#modem.sendSms(error_toomany_message, origin_number)
-    elif len(found) < 1:
-        print(error_toofew_message)
-		#modem.sendSms(error_toofew_message, origin_number)
-    elif len(found) == 1:
-        print('found command ' + found[0] + '!')
-        command = found[0]
-        return command
-
-# Maybe delete this 
-def find_lockername(incoming_sms, origin_number):
-	foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
-	if len(foundnames) > 1:
-		print(error_toomany_names)
-		#modem.sendSms(error_toomany_names, origin_number)
-	elif len(foundnames) < 1:
-		print(error_toofew_names)
-		#modem.sendSms(error_toofew_names, origin_number)
-	elif len(foundnames) == 1:
-		lockername = foundnames[0]
-		return lockername
 
 # Callback function for modem. Converts caught SMS object into a unique file which is picked up in main.
 # This is done in order to 
@@ -147,63 +119,94 @@ def check_new_sms(locker_bank, modem):
 					
 					# Boomerang test
 					#modem.sendSms(sms.phone, sms.message)
-					send_sms(modem, sms.phone, sms.message)
+					#send_sms(modem, sms.phone, sms.message)
 					#print sms.index
-					#parse_and_operate_sms(locker_bank, sms, modem)
+					parse_and_operate_sms(locker_bank, sms, modem)
 				else:
 					print 'found a non-matching file'
 	else:
 		print 'dir not created yet'
 
 
+# Extract a single command from the input, error if there is not exactly 1 command.
+def find_command(modem, incoming_sms, origin_number):
+    #find all matches of the words in commands in the string incoming_sms
+    found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms, re.IGNORECASE)
+    # exactly 1 command is valid.
+    if len(found) > 1:
+		send_sms(modem, origin_number, error_toomany_message)
+    elif len(found) < 1:
+		send_sms(modem, origin_number, error_toofew_message)
+    elif len(found) == 1:
+        print('found command ' + found[0] + '!')
+        command = found[0]
+        return command
+
+
 def parse_and_operate_sms(locker_bank, sms_obj, modem):
 	# change after testing
 	incoming_sms = sms_obj.message
 	incoming_number = sms_obj.phone
+	logger = logging.getLogger('LFL_app.parse_and_operate_sms')
 	
 	#command = decode_input(incoming_sms.text, incoming_sms.number)
-	command = find_command(incoming_sms, incoming_number)
+	command = find_command(modem, incoming_sms, incoming_number)
+	command = command.lower()
 	if command == 'help':
-		print help_message + locker_bank.list_available_lockers()
+		logger.info('Entering help block.')
+		#print help_message + locker_bank.list_available_lockers()
+		return_message = help_message + locker_bank.list_available_lockers()
+		send_sms(modem, incoming_number, return_message)
 	elif command == 'renew':
+		logger.info('Entering renew block.')
 		if locker_bank.user_has_locker_checkedout(incoming_number):
 			#print incoming_number
 			locker = locker_bank.get_locker_obj_given_locker_number(incoming_number)
 			#print locker
 			renewals_left = locker.get_renewals_left()
 			if renewals_left < 1:
-				print no_renewals_left_msg + " Your locker due date is " + locker.due_date
+				return_message = no_renewals_left_msg + " Your locker due date is " + locker.due_date
+				send_sms(modem, incoming_number, return_message)
 			else:
 				locker.renew_locker()
-				print "send text informing host of renewal"
-				print locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(locker.get_renewals_left()) + " renewals left."
+				#print "send text informing host of renewal"
+				return_message = locker_renewed_msg + " Your locker due date is " + locker.due_date + ". You have " + str(locker.get_renewals_left()) + " renewals left."
+				send_sms(modem, incoming_number, return_message)
 		else:
-			print locker_not_checked_out_msg
+			send_sms(modem, incoming_number, locker_not_checked_out_msg)
 	elif command == 'checkout':
+		logger.info('Entering checkout block.')
 		# Inform potential tenant of the earliest they could checkout a locker.
 		if locker_bank.is_locker_cluster_full():
-			print locker_cluster_full_msg + locker_bank.earliest_possible_release()
+			return_message = locker_cluster_full_msg + locker_bank.earliest_possible_release()
+			send_sms(modem, incoming_number, return_message)
 		else:
 			lockernames = locker_bank.get_locker_list()
-			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms)
+			# This needs to be exact case for now
+			foundnames = re.findall(r"(?=("+'|'.join(lockernames)+r"))", incoming_sms) #, re.IGNORECASE)
 			if len(foundnames) > 1:
-				print(error_toomany_names)
+				print()
+				send_sms(modem, incoming_number, error_toomany_names)
 			elif len(foundnames) < 1:
-				print(error_toofew_names)
+				send_sms(modem, incoming_number, error_toofew_name)
 			elif len(foundnames) == 1:
-#               print('found lockername ' + foundnames[0] + '!') # Debug
+				print('found lockername ' + foundnames[0] + '!') # Debug
 				lockername = foundnames[0]
 				print 'try to checkout: ' + lockername  # Debug
 				# try to checkout, give list of available otherwise
 				result = locker_bank.checkout_locker(incoming_number, lockername)
 				if result == 1:
 					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
-					print "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
+					return_message = "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
+					send_sms(modem, incoming_number, return_message)
 				elif result == 'duplicate number':
-					print "There is already a locker checked out under this number!"
+					return_message = "There is already a locker checked out under this number!"
+					send_sms(modem, incoming_number, return_message)
 				elif result == 'checked out':
-					print "The locker " + lockername + " has already been checked out! Other available lockers: " + locker_bank.list_available_lockers()
-				##else:
+					return_message = "The locker " + lockername + " has already been checked out! Other available lockers: " + locker_bank.list_available_lockers()
+					send_sms(modem, incoming_number, return_message)
+				else:
+					logger.error('failed to parse checkout command logic')
 					# There is at least one locker or
 					# locker_bank.is_locker_cluster_full would prevent getting here.
 					#print 'no checkout... BUT! ' + locker_bank.list_available_lockers()
@@ -291,7 +294,7 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 def signal_handler(signal, frame):
 	logger = logging.getLogger('LFL_app.signal_handler')
 	logger.info('signal: ' + str(signal) + ' was caught! Closing modem and then program...')
-	modem.close()
+	#modem.close()
 	sys.exit(0)
 
 

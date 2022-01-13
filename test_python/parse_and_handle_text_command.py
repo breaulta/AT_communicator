@@ -30,7 +30,7 @@ locker_cluster_full_msg = "This locker cluster is full. The next possible openin
 #Test Inputs here
 #incoming_sms = "list lockers"
 #incoming_sms = "checkout"
-incoming_sms = "checkout Nala"
+incoming_sms = "Checkout Nala"
 #incoming_sms = "help"
 #incoming_sms = "renew jfkd help he lp chekc checkout :$#@fdah9  \n list "
 #incoming_sms = "Nala"
@@ -71,7 +71,7 @@ commands.append('checkout')	#in the form of 'checkout <lockername>'
 commands.append('renew')	#target locker based on origin number
 
 #find all matches of the words in commands in the string incoming_sms
-found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms)
+found = re.findall(r"(?=("+'|'.join(commands)+r"))", incoming_sms, re.IGNORECASE)
 
 sms_origin_number = '192.168.1.1'
 # only 1 command is valid
