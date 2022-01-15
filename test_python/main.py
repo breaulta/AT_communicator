@@ -53,15 +53,20 @@ def send_sms(modem, number, message):
 	logger = logging.getLogger('LFL_app.send_sms')
 	logger.info('Attempting to send sms with text: ' + message + ' to phone number: ' + number)
 	try:
-		#sent_sms = modem.sendSms(number, message, waitForDeliveryReport=True, deliveryTimeout=30)
-		sent_sms = modem.sendSms(number, message, waitForDeliveryReport=False)
+		modem.waitForNetworkCoverage(10)
 	except TimeoutException:
-		logger.info('Timeout occurred with sending sms.')
+		logger.error('Network signal strength timed out.')
 	else:
-		if sent_sms.report:
-			print('Message sent{0}'.format(' and delivered OK.' if sms.status == SentSms.DELIVERED else ', but delivery failed.'))
+		try:
+			#sent_sms = modem.sendSms(number, message, waitForDeliveryReport=True, deliveryTimeout=30)
+			sent_sms = modem.sendSms(number, message, waitForDeliveryReport=False)
+		except TimeoutException:
+			logger.info('Timeout occurred with sending sms.')
 		else:
-			logger.info('sent sms report not received.')
+			if sent_sms.report:
+				print('Message sent{0}'.format(' and delivered OK.' if sms.status == SentSms.DELIVERED else ', but delivery failed.'))
+			else:
+				logger.info('sent sms report not received.')
 
 
 # Callback function for modem. Converts caught SMS object into a unique file which is picked up in main.
@@ -102,7 +107,8 @@ def check_new_sms(locker_bank, modem):
 	if os.path.isdir(new_sms_path):
 		dirlist = os.listdir(new_sms_path)
 		if not dirlist:
-			print 'found no new file'
+			#print 'found no new file'
+			next
 		else:
 			# allows for other files in the dir to not break it.
 			for filename in dirlist:
@@ -127,7 +133,8 @@ def check_new_sms(locker_bank, modem):
 				else:
 					print 'found a non-matching file'
 	else:
-		print 'dir not created yet'
+		#print 'dir not created yet'
+		next
 
 
 # Extract a single command from the input, error if there is not exactly 1 command.
@@ -272,13 +279,6 @@ def setUpLogging():
 def timing_renewal_handler(main_lockers, server_start_time, modem):
 	logger = logging.getLogger('LFL_app.timing_renewal_handler')
 	now = datetime.now() #keep calculating
-	# log message stating the program status every hour. uptime, number of lockers and due date, 
-	uptime_calc = now - server_start_time
-	uptime_seconds = int(uptime_calc.total_seconds())
-	uptime_hours = uptime_seconds / 3600
-	#if uptime_seconds % 3 == 0:
-	if uptime_seconds % 3600 == 0:
-		logger.info('Server uptime: ' + str(uptime_hours) + ' hours. ' + 'Uptime seconds: ' + str(uptime_seconds))
 	bank = main_lockers.get_locker_list()
 	for lockername in bank:
 		locker_obj = main_lockers.get_locker_obj_given_locker_name( lockername )
@@ -288,7 +288,6 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 			diff = duedate - now
 			seconds = diff.total_seconds()
 			hours = seconds / 3600
-			print hours #debug
 			#renew hours left check
 			if hours <= 48 and locker_obj.twodayflag == 1:
 				locker_obj.twodayflag = 0
@@ -305,8 +304,6 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 				# Close tenancy of current locker.
 				main_lockers.freeup_locker(lockername)
 				print 'the locker: ' + lockername + ' has been closed!'
-			else:
-				print 'the locker: ' + lockername + ' is checked out and not due.'
 
 
 def signal_handler(signal, frame):
@@ -351,12 +348,29 @@ def main():
 	signal.signal(signal.SIGINT, signal_handler)
 	signal.signal(signal.SIGTERM, signal_handler)
 
+	# Initial
+	time_of_last_status_log = start_time
+
 	# Check for new received messages, spawn renewal messages, and save state.
 	while 1:
 		# Check for new messages and operate on them.
 		check_new_sms(main_lockers, modem)
 		# Check if a renewal message needs to be spawned and handle timing events.
 		timing_renewal_handler(main_lockers, start_time, modem)
+		# Post periodic status message to log.
+		now = datetime.now()
+		time_since_status_log = now - time_of_last_status_log
+		seconds_since_status_log = time_since_status_log.total_seconds()
+		if seconds_since_status_log > 30:
+			# Post status message to log.
+			uptime_calc = now - start_time
+			uptime_seconds = int(uptime_calc.total_seconds())
+			uptime_hours = uptime_seconds / 3600
+			logger.info('Server uptime: ' + str(uptime_hours) + ' hours. ' + 'Uptime seconds: ' + str(uptime_seconds))
+			logger.info(main_lockers.status())
+			# Reset status log timer.
+			time_of_last_status_log = now
+
 		# Back up data/save current state.
 		main_lockers.save_lockers_to_json_file()
 		time.sleep(2)

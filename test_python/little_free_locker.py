@@ -60,6 +60,15 @@ class Lockers:
 				return 1
 		return 0
 
+	def status(self):
+		status_str = 'Locker Bank Status:\n'
+		for locker in self.lockers:
+			status_str += 'Name:' + locker.name + '  '
+			status_str += 'Tenant number:' + locker.tenant_number + '  '
+			status_str += 'Due date:' + locker.due_date + '  '
+			status_str += 'with ' + locker.renewals_used + '/' + locker.total_renewals_possible +' renewals used.\n'
+		return status_str
+
 	def save_lockers_to_json_file(self):
 		locker_to_json = {}
 		locker_to_json['lockers'] = []
