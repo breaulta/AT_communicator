@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import logging
 mod_logger = logging.getLogger('LFL_app.little_free')
 
-json_database = "locker_database.json"
+json_database = '/home/pi/communicator/test_python/locker_database.json'
 
 #For holding multiple Locker objects.
 #kwargs will hold locker name to locker object.

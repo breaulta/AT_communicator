@@ -23,9 +23,12 @@ PORT = '/dev/ttyUSB2'
 BAUDRATE = 115200
 PIN = None # SIM card PIN (if any)
 
-sms_database_filename = "sms_database.json"
-locker_database = 'locker_database.json'
-new_sms_path = './incoming_sms'
+# Use absolute paths in order for systemd service controls to work properly.
+sms_database_filename = '/home/pi/communicator/test_python/sms_database.json'
+locker_database = '/home/pi/communicator/test_python/locker_database.json'
+template = '/home/pi/communicator/test_python/template.txt'
+new_sms_path = '/home/pi/communicator/test_python/incoming_sms'
+logfile = '/home/pi/communicator/test_python/locker.log'
 
 # SMS stock messages
 help_message = "In order to checkout a locker, text this number 'checkout <name_of_locker>'. Command words are 'help' 'renew' 'checkout'. The list of available lockers are as follows: "
@@ -43,9 +46,9 @@ error_one_per_tenant = "Sorry, this locker bank only allows a tenant to check ou
 
 # SMS commands
 commands = []
-commands.append('help')     #instructions and a list of available lockers
-commands.append('checkout') #in the form of 'checkout <lockername>'
-commands.append('renew')    #target locker based on origin number
+commands.append('help')     # instructions and a list of available lockers
+commands.append('checkout') # in the form of 'checkout <lockername>'
+commands.append('renew')    # target locker based on origin number
 commands.append('close')    # Close tenancy of locker based on origin number
 
 # send sms function that includes the log.
@@ -176,6 +179,8 @@ def parse_and_operate_sms(locker_bank, sms_obj, modem):
 			locker_bank.freeup_locker(locker_obj.name)
 			close_message = 'The locker, ' + locker_obj.name + ', has been closed.'
 			send_sms(modem, incoming_number, close_message)
+			host_msg = 'The tenancy of locker:' + locker_obj.name + ' has been closed by the tenant.'
+			send_sms(modem, locker_obj.host_number, host_msg)
 		else:
 			send_sms(modem, incoming_number, "You don't have a locker checked out!")
 	elif command == 'renew':
@@ -221,6 +226,9 @@ def parse_and_operate_sms(locker_bank, sms_obj, modem):
 					locker_obj = locker_bank.get_locker_obj_given_locker_name(lockername)
 					return_message = "You have successfully checked out locker '" + lockername + "'. The combo is: " + locker_obj.combo + ". The current due date is: " + locker_obj.due_date + ". You may renew " + str(locker_obj.get_renewals_left()) + " times."
 					send_sms(modem, incoming_number, return_message)
+					# Inform host of checkout activity.
+					host_msg = 'Locker:' + locker_obj.name + ' was checked out by:' + locker_obj.tenant_number + ' with due date: ' + locker_obj.due_date
+					send_sms(modem, locker_obj.host_number, host_msg)
 				elif result == 'duplicate number':
 					return_message = "There is already a locker checked out under this number!"
 					send_sms(modem, incoming_number, return_message)
@@ -248,7 +256,7 @@ def setUpLogging():
 	
 
 	# create file handler which logs even debug messages
-	fh = logging.FileHandler('locker.log')
+	fh = logging.FileHandler(logfile)
 	# Send everything to logfile.
 	fh.setLevel(logging.DEBUG)
 	# create console handler with a higher log level
@@ -304,6 +312,8 @@ def timing_renewal_handler(main_lockers, server_start_time, modem):
 				# Close tenancy of current locker.
 				main_lockers.freeup_locker(lockername)
 				print 'the locker: ' + lockername + ' has been closed!'
+				host_msg = 'The tenancy of locker:' + locker_obj.name + ' has been closed automatically as the due date has been reached.'
+				send_sms(modem, locker_obj.host_number, host_msg)
 
 
 def signal_handler(signal, frame):
@@ -324,10 +334,11 @@ def main():
 	main_lockers = Lockers()
 	# Load unique locker setup from template file curated for host input.
 	if os.path.isfile(locker_database):
+		print 'Loading data from Lockers json database...'
 		main_lockers.json_file_to_lockers_obj()
 	else:
 		print 'Locker database not found! Creating new one from template file...'
-		main_lockers.load_lockers_from_user_input_txt_file("template.txt")
+		main_lockers.load_lockers_from_user_input_txt_file(template)
 
 	#Initialize Modem, set to call handleSms() when a text is received.
 	modem = GsmModem(PORT, BAUDRATE, smsReceivedCallbackFunc=handleSms)
