@@ -24,7 +24,7 @@ class Transmitter:
 			raise Exception("Must run as root!")
 		self.ensure_sim_card_connected_to_network(qmi_path)
 		#self._configure_ser_connection_to_usb(self.usb_path)
-		self._connect_to_modem(port, baud, qmi_path)
+		#self._connect_to_modem(port, baud, qmi_path)
 		#Globals for Concatenated Short Messages (PDU)
 		self.message_ref = 0x00
 		self.CSM_ref = 0x00
@@ -136,8 +136,8 @@ class Transmitter:
 
 	#remove
 	#Send AT command to modem using pgsmm.
-	def send_AT(self, AT):
-		prune = self.modem.write(AT, timeout=5, expectedResponseTermSeq='> ') # WRONG 
+	def send_AT(self, modem, AT):
+		prune = modem.write(AT, timeout=5, expectedResponseTermSeq='> ') # WRONG 
 		#print('at: ', AT)
 		print('raw return from modem.write: ', prune)
 		response = re.search("\[u'(.+)'\]", str(prune))
@@ -165,9 +165,9 @@ class Transmitter:
 
 	#Needed for long text
     #Set SMS for text mode. sms_mode of 1 = texting (this is what we want), 0 = Programmable data unit PDU.
-	def set_sms_mode(self, sms_mode):
+	def set_sms_mode(self, modem, sms_mode):
 		sms_mode = str(sms_mode) #convert num to string
-		sms_mode_response = self.send_AT('AT+CMGF=' + sms_mode)
+		sms_mode_response = self.send_AT(modem, 'AT+CMGF=' + sms_mode)
 		print ("sms mode response: " + sms_mode_response)
 		ok = re.findall("OK", sms_mode_response)
 		if (not ok):
@@ -270,8 +270,9 @@ class Transmitter:
 
 	#Send a series of Concatenated Short Messages in PDU mode. The recipient's phone (Terminal Equipment) will re-assemble.
 	#Function composed from SMS/Octet map in a way that is easy to read, walk through.
-	def send_long_text(self, number, message):
-		self.set_sms_mode('0')				#Set modem to PDU mode.
+	def send_long_text(self, modem, number, message):
+		number = re.sub(r'^\+', '', number)
+		self.set_sms_mode(modem, '0')				#Set modem to PDU mode.
 		service_center_address = 0x00		#Value of 00 tells the modem to use the default address.
 		#1 in the least sig bit indicates SMS-SUBMIT. 1 in the 7th least sig bit indicates the presence of the User Data Header.
 		#b 0100 0001 = 0x41
@@ -337,8 +338,8 @@ class Transmitter:
 			print(pdu_string)
 			#Send the modem the CMGS command in the format to send a text out, where \x1a is the required ctrl+Z that denotes EOF
 			CMGS = 'AT+CMGS=' + pdu_length
-			response1 = self.modem.write(CMGS, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
-			response2 = self.modem.write( pdu_string, timeout=100, writeTerm='\x1a')
+			response1 = modem.write(CMGS, timeout=5, expectedResponseTermSeq='> ') #, waitForResponse=False)
+			response2 = modem.write( pdu_string, timeout=100, writeTerm='\x1a')
 
 		#After the set of Concatenated Short Messages finishes, increment so the next group gets a different ref number.
 		self.CSM_ref += 1
